@@ -11,6 +11,7 @@
     "declaration": true
   },
   "files": [
-    "src/gantt.ts"
+    "src/gantt.ts",
+    "node_modules/powerbi-models/dist/models-noexports.d.ts"
   ]
 }

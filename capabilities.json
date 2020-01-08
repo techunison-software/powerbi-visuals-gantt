@@ -321,6 +321,11 @@
                         "bool": true
                     }
                 },
+                "filter":{
+                    "type":{
+                        "filter":true
+                    }
+                },
                 "scrollToCurrentTime": {
                     "displayName": "Scroll to current time",
                     "displayNameKey": "Visual_ScrollToCurrentTime",

@@ -17,7 +17,9 @@
   "assets": {
     "icon": "assets/icon.png"
   },
-  "externalJS": [],
+  "externalJS": [
+    "node_modules/powerbi-models/dist/models.js"
+  ],
   "style": "style/gantt.less",
   "capabilities": "capabilities.json"
 }

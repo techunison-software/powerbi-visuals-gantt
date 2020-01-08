@@ -34,7 +34,6 @@ import powerbi from "powerbi-visuals-api";
 type Selection<T1, T2 = T1> = d3.Selection<any, T1, any, T2>;
 import timeScale = d3.ScaleTime;
 
-
 // powerbi
 import DataView = powerbi.DataView;
 import IViewport = powerbi.IViewport;
@@ -105,7 +104,6 @@ import LegendPosition = legendInterfaces.LegendPosition;
 import LegendData = legendInterfaces.LegendData;
 import createLegend = LegendModule.createLegend;
 import LegendDataPoint = legendInterfaces.LegendDataPoint;
-import * as powerbi_models from "powerbi-models";
 
 // powerbi.extensibility.utils.chart
 import IAxisProperties = axisInterfaces.IAxisProperties;
@@ -169,8 +167,6 @@ const GanttDurationUnitType = [
     "day",
 ];
 let custominterval:String="";
-
-let initoptions:VisualUpdateOptions=null;
 
 export enum ResourceLabelPositions {
     Top = <any>"Top",
@@ -260,7 +256,6 @@ export class Gantt implements IVisual {
     private colorHelper: ColorHelper;
     private legend: ILegend;
 
-    
     private textProperties: TextProperties = {
         fontFamily: "wf_segoe-ui_normal",
         fontSize: PixelConverter.toString(9),
@@ -403,7 +398,6 @@ export class Gantt implements IVisual {
         this.eventService = options.host.eventService;
 
         this.createViewport(options.element);
-        this.customeventhandler();
     }
 
     /**
@@ -497,37 +491,6 @@ export class Gantt implements IVisual {
             interactiveBehavior);
 
         this.ganttDiv.on("scroll", function (evt) {
-            
-         
-            var endScroll=this.scrollLeft/this.scrollWidth;
-            console.log("endScroll",endScroll);
-            
-            // if(this.scrollLeft  this.scrollWidth) console.log("end of scroll :" + this.scrollWidth);
-            let categories: powerbi.DataViewCategoricalColumn = initoptions.dataViews[0].categorical.categories[0];
-            debugger;
-
-            let target: powerbi_models.IFilterColumnTarget = {
-                table: "DimDateTime", // table
-                column: "DateTimeKey" // col1
-            };
-            console.log("target",target);
-
-            let conditions: powerbi_models.IAdvancedFilterCondition[] = [];
-
-            conditions.push({
-                operator: "GreaterThanOrEqual",
-                value: '2020010210'
-            });
-            conditions.push({
-                operator: "LessThanOrEqual",
-                value: '2020010211'
-            });
-
-            let filter: powerbi_models.IAdvancedFilter = new window['powerbi-models'].AdvancedFilter(target, "And", conditions);
-
-            // invoke the filter
-            this.host.applyJsonFilter(filter, "general", "filter", FilterAction.merge);
-
             if (self.viewModel) {
                 const taskLabelsWidth: number = self.viewModel.settings.taskLabels.show
                     ? self.viewModel.settings.taskLabels.width
@@ -539,8 +502,13 @@ export class Gantt implements IVisual {
                     .attr("height", 20);
             }
         }, false);
+        d3.selectAll("[name=intervalbtngrp]").on("click", function (this) {
+            custominterval=d3.select(this).attr("id");
+            console.log("custominterval",custominterval);
+            // this.update(options);
+        });
     }
-    
+
     /**
      * Clear the viewport area
      */
@@ -1518,31 +1486,17 @@ export class Gantt implements IVisual {
 
         return axisLength;
     }
-    
+
     /**
     * Called on data change or resizing
     * @param options The visual option that contains the dataview and the viewport
     */
-    public customeventhandler():void{
-        let self: Gantt = this;
-        this.ganttDiv.attr("name","ganttDiv");
-        d3.selectAll("[name=intervalbtngrp]").on("click", function () {
-            custominterval=d3.select(this).attr("id");
-            console.log("custominterval",custominterval);
-            console.log("this.initoptions",initoptions);
-            self.update(initoptions);
-            // console.log("Hello");
-            // Gantt.
-        });    
-    }
     public update(options: VisualUpdateOptions): void {
-        let self: Gantt = this;
         if (!options || !options.dataViews || !options.dataViews[0]) {
             this.clearViewport();
             return;
         }
-        initoptions=options;
-        
+
         this.viewModel = Gantt.converter(options.dataViews[0], this.host, this.colors, this.colorHelper, this.localizationManager);
         console.log("options",options);
         // for dublicated milestone types
