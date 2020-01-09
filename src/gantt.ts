@@ -148,14 +148,14 @@ import { drawExpandButton, drawCollapseButton, drawMinusButton, drawPlusButton }
 
 const PercentFormat: string = "0.00 %;-0.00 %;0.00 %";
 const ScrollMargin: number = 100;
-const MillisecondsInASecond: number = 60000;
-const MillisecondsInAMinute: number = 15 * MillisecondsInASecond;
-const MillisecondsInAHour: number = 4 * MillisecondsInAMinute;
-const MillisecondsInADay: number = 12 * MillisecondsInAHour;
-const MillisecondsInWeek: number = 2 * MillisecondsInADay;
-const MillisecondsInAMonth: number = 30 * MillisecondsInADay;
-const MillisecondsInAYear: number = 365 * MillisecondsInADay;
-const MillisecondsInAQuarter: number = MillisecondsInAYear / 4;
+const MillisecondsInASecond: number = 60000; // 1 Minute
+const MillisecondsInAMinute: number = 15 * MillisecondsInASecond; // 15 Minutes
+const MillisecondsInAHour: number = 4 * MillisecondsInAMinute; // 1 Hour
+const MillisecondsInADay: number = 4 * MillisecondsInAHour; // 4 Hours 
+const MillisecondsInWeek: number = 3 * MillisecondsInADay; // 12 Hours
+const MillisecondsInAMonth: number = 2 * MillisecondsInADay; // 24 Hours
+const MillisecondsInAYear: number = 365 * MillisecondsInADay; // 1 Year
+const MillisecondsInAQuarter: number = MillisecondsInAYear / 4; // 1 Quarter
 const PaddingTasks: number = 5;
 const DaysInAWeekend: number = 2;
 const DaysInAWeek: number = 5;
@@ -168,9 +168,9 @@ const GanttDurationUnitType = [
     "hour",
     "day",
 ];
-let custominterval:String="";
+let customInterval:String="";
 
-let initoptions:VisualUpdateOptions=null;
+let initOptions:VisualUpdateOptions=null;
 
 export enum ResourceLabelPositions {
     Top = <any>"Top",
@@ -403,7 +403,7 @@ export class Gantt implements IVisual {
         this.eventService = options.host.eventService;
 
         this.createViewport(options.element);
-        this.customeventhandler();
+        this.customEventHandler();
     }
 
     /**
@@ -423,7 +423,7 @@ export class Gantt implements IVisual {
             this.visualFilterSelector=this.visualFilterDiv.append("button").attr("name","intervalbtngrp").attr("id","1").html("1m");
             this.visualFilterDiv.append("button").attr("name","intervalbtngrp").attr("id","2").html("15m");
             this.visualFilterDiv.append("button").attr("name","intervalbtngrp").attr("id","3").html("1hr");
-            this.visualFilterDiv.append("button").attr("name","intervalbtngrp").attr("id","4").html("4hr");
+            this.visualFilterDiv.append("button").attr("name","intervalbtngrp").attr("id","4").html("3hr");
             this.visualFilterDiv.append("button").attr("name","intervalbtngrp").attr("id","5").html("12hr");
             this.visualFilterDiv.append("button").attr("name","intervalbtngrp").attr("id","6").html("24hr");
 
@@ -503,8 +503,8 @@ export class Gantt implements IVisual {
             console.log("endScroll",endScroll);
             
             // if(this.scrollLeft  this.scrollWidth) console.log("end of scroll :" + this.scrollWidth);
-            let categories: powerbi.DataViewCategoricalColumn = initoptions.dataViews[0].categorical.categories[0];
-            debugger;
+            let categories: powerbi.DataViewCategoricalColumn = initOptions.dataViews[0].categorical.categories[0];
+            // debugger;
 
             let target: powerbi_models.IFilterColumnTarget = {
                 table: "DimDateTime", // table
@@ -523,10 +523,10 @@ export class Gantt implements IVisual {
                 value: '2020010211'
             });
 
-            let filter: powerbi_models.IAdvancedFilter = new window['powerbi-models'].AdvancedFilter(target, "And", conditions);
+            // let filter: powerbi_models.IAdvancedFilter = new window['powerbi-models'].AdvancedFilter(target, "And", conditions);
 
-            // invoke the filter
-            this.host.applyJsonFilter(filter, "general", "filter", FilterAction.merge);
+            // // invoke the filter
+            // this.host.applyJsonFilter(filter, "general", "filter", new window['powerbi-models'].FilterAction.merge);
 
             if (self.viewModel) {
                 const taskLabelsWidth: number = self.viewModel.settings.taskLabels.show
@@ -1523,14 +1523,14 @@ export class Gantt implements IVisual {
     * Called on data change or resizing
     * @param options The visual option that contains the dataview and the viewport
     */
-    public customeventhandler():void{
+    public customEventHandler():void{
         let self: Gantt = this;
         this.ganttDiv.attr("name","ganttDiv");
         d3.selectAll("[name=intervalbtngrp]").on("click", function () {
-            custominterval=d3.select(this).attr("id");
-            console.log("custominterval",custominterval);
-            console.log("this.initoptions",initoptions);
-            self.update(initoptions);
+            customInterval=d3.select(this).attr("id");
+            console.log("customInterval",customInterval);
+            console.log("this.initOptions",initOptions);
+            self.update(initOptions);
             // console.log("Hello");
             // Gantt.
         });    
@@ -1541,7 +1541,7 @@ export class Gantt implements IVisual {
             this.clearViewport();
             return;
         }
-        initoptions=options;
+        initOptions=options;
         
         this.viewModel = Gantt.converter(options.dataViews[0], this.host, this.colors, this.colorHelper, this.localizationManager);
         console.log("options",options);
@@ -1610,31 +1610,41 @@ export class Gantt implements IVisual {
             if (startDate.toString() === endDate.toString()) {
                 endDate = new Date(endDate.valueOf() + (24 * 60 * 60 * 1000));
             }
-            switch(custominterval)
+            switch(customInterval)
             {
                 case "1":
                     this.dateTypeMilliseconds= MillisecondsInASecond;
+                    // ticks=20;
                     break;
                 case "2":
                     this.dateTypeMilliseconds= MillisecondsInAMinute;
+                    // ticks=20;
                     break;
                 case "3":
                     this.dateTypeMilliseconds= MillisecondsInAHour;
+                    // ticks=20;
                     break;
                 case "4":
                     this.dateTypeMilliseconds=MillisecondsInADay;
+                    // ticks=20;
                     break;
                 case "5":
                     this.dateTypeMilliseconds=MillisecondsInWeek;
+                    // ticks=20;
+                    break;
+                case "6":
+                    this.dateTypeMilliseconds=MillisecondsInWeek;
+                    // ticks=20;
                     break;
                 default:
                     this.dateTypeMilliseconds= Gantt.getDateType(settings.dateType.type);
+                    // ticks=10;
                     break;
             }
             let ticks: number = Math.ceil(Math.round(endDate.valueOf() - startDate.valueOf()) / this.dateTypeMilliseconds);
             // let ticks: number = 20;
-            console.log("ticks",ticks,"startDate",startDate,"endDate",endDate,"dateTypeMilliseconds",this.dateTypeMilliseconds);
-            ticks = ticks < 2 ? 2 : ticks;
+            console.log("ticks",ticks,"startDate",startDate,startDate.valueOf(),"endDate",endDate,endDate.valueOf(),"dateTypeMilliseconds",this.dateTypeMilliseconds);
+            ticks = ticks < 4 ? 4 : ticks;
 
             axisLength = ticks * Gantt.DefaultTicksLength;
             axisLength = this.scaleAxisLength(axisLength);
