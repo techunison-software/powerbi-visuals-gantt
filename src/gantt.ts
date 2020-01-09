@@ -260,6 +260,7 @@ export class Gantt implements IVisual {
     private colorHelper: ColorHelper;
     private legend: ILegend;
 
+
     
     private textProperties: TextProperties = {
         fontFamily: "wf_segoe-ui_normal",
@@ -409,23 +410,52 @@ export class Gantt implements IVisual {
     /**
      * Create the viewport area of the gantt chart
      */
+    public updateOnRangeSelectonChange(): void {
+        // this.clearAllDiscreteSelections();
+        let categories: powerbi.DataViewCategoricalColumn= initOptions.dataViews[0].categorical.categories[0]
+
+        let target: IFilterColumnTarget = {
+            table: categories.source.queryName.substr(0, categories.source.queryName.indexOf('.')), // table
+            column: categories.source.displayName // col1
+        };
+        
+        // let value: ValueRange<number> = this.scalableRange.getValue();
+        // if (!value.min && !value.max) {
+        //     return;
+        // }
+
+        let conditions: IAdvancedFilterCondition[] = [];
+        // let target: IFilterColumnTarget = this.callbacks.getAdvancedFilterColumnTarget();
+
+            conditions.push({
+                operator: "GreaterThan",
+                value: new Date("01/01/2020")
+            });
+        
+            conditions.push({
+                operator: "LessThan",
+                value: new Date("07/01/2020")
+            });
+        
+        let filter: IAdvancedFilter = new window['powerbi-models'].AdvancedFilter(target, "And", conditions);
+        this.host.applyJsonFilter(filter, "general", "filter", new window['powerbi-models'].FilterAction.merge);
+    }
     private createViewport(element: HTMLElement): void {
-        let self = this;
+        let self:Gantt = this;
         const isHighContrast: boolean = this.colorHelper.isHighContrast;
         const axisBackgroundColor: string = this.colorHelper.getThemeColor();
         // create div container to the whole viewport area
+        this.visualFilterSelector=this.body.append("button").attr("name","intervalbtngrp").attr("id","1").html("1m");
+        this.body.append("button").attr("name","intervalbtngrp").attr("id","2").html("15m");
+        this.body.append("button").attr("name","intervalbtngrp").attr("id","3").html("1hr");
+        this.body.append("button").attr("name","intervalbtngrp").attr("id","4").html("3hr");
+        this.body.append("button").attr("name","intervalbtngrp").attr("id","5").html("12hr");
+        this.body.append("button").attr("name","intervalbtngrp").attr("id","6").html("24hr");
+
         this.ganttDiv = this.body.append("div")
             .classed(Selectors.Body.className, true);
-
-
-            this.visualFilterDiv=this.ganttDiv
-            .append("div").style("width","100%");
-            this.visualFilterSelector=this.visualFilterDiv.append("button").attr("name","intervalbtngrp").attr("id","1").html("1m");
-            this.visualFilterDiv.append("button").attr("name","intervalbtngrp").attr("id","2").html("15m");
-            this.visualFilterDiv.append("button").attr("name","intervalbtngrp").attr("id","3").html("1hr");
-            this.visualFilterDiv.append("button").attr("name","intervalbtngrp").attr("id","4").html("3hr");
-            this.visualFilterDiv.append("button").attr("name","intervalbtngrp").attr("id","5").html("12hr");
-            this.visualFilterDiv.append("button").attr("name","intervalbtngrp").attr("id","6").html("24hr");
+            // console.log("visualTitle",d3.select(".visualTitle"));
+            
 
         // create container to the svg area
         this.ganttSvg = this.ganttDiv
@@ -495,12 +525,14 @@ export class Gantt implements IVisual {
             true,
             LegendPosition.Top,
             interactiveBehavior);
+            // let self1:Gantt=this;
 
         this.ganttDiv.on("scroll", function (evt) {
-            
-         
+            console.log("Updating Date Range")
+            // console.log(d3.selectAll(".preTextWithEllipsis"));
+            self.updateOnRangeSelectonChange();
             var endScroll=this.scrollLeft/this.scrollWidth;
-            console.log("endScroll",endScroll);
+            // console.log("endScroll",endScroll);
             
             // if(this.scrollLeft  this.scrollWidth) console.log("end of scroll :" + this.scrollWidth);
             let categories: powerbi.DataViewCategoricalColumn = initOptions.dataViews[0].categorical.categories[0];
@@ -510,7 +542,7 @@ export class Gantt implements IVisual {
                 table: "DimDateTime", // table
                 column: "DateTimeKey" // col1
             };
-            console.log("target",target);
+            // console.log("target",target);
 
             let conditions: powerbi_models.IAdvancedFilterCondition[] = [];
 
@@ -1528,15 +1560,15 @@ export class Gantt implements IVisual {
         this.ganttDiv.attr("name","ganttDiv");
         d3.selectAll("[name=intervalbtngrp]").on("click", function () {
             customInterval=d3.select(this).attr("id");
-            console.log("customInterval",customInterval);
-            console.log("this.initOptions",initOptions);
+            // console.log("customInterval",customInterval);
+            // console.log("this.initOptions",initOptions);
             self.update(initOptions);
             // console.log("Hello");
             // Gantt.
+
         });    
     }
     public update(options: VisualUpdateOptions): void {
-        let self: Gantt = this;
         if (!options || !options.dataViews || !options.dataViews[0]) {
             this.clearViewport();
             return;
@@ -1544,7 +1576,7 @@ export class Gantt implements IVisual {
         initOptions=options;
         
         this.viewModel = Gantt.converter(options.dataViews[0], this.host, this.colors, this.colorHelper, this.localizationManager);
-        console.log("options",options);
+        // console.log("options",options);
         // for dublicated milestone types
         if (this.viewModel && this.viewModel.milestonesData) {
             let newMilestoneData: MilestoneData = this.viewModel.milestonesData;
@@ -1643,7 +1675,7 @@ export class Gantt implements IVisual {
             }
             let ticks: number = Math.ceil(Math.round(endDate.valueOf() - startDate.valueOf()) / this.dateTypeMilliseconds);
             // let ticks: number = 20;
-            console.log("ticks",ticks,"startDate",startDate,startDate.valueOf(),"endDate",endDate,endDate.valueOf(),"dateTypeMilliseconds",this.dateTypeMilliseconds);
+            // console.log("ticks",ticks,"startDate",startDate,startDate.valueOf(),"endDate",endDate,endDate.valueOf(),"dateTypeMilliseconds",this.dateTypeMilliseconds);
             ticks = ticks < 4 ? 4 : ticks;
 
             axisLength = ticks * Gantt.DefaultTicksLength;
@@ -1806,7 +1838,7 @@ export class Gantt implements IVisual {
             scaleType: options.categoryAxisScaleType,
             axisDisplayUnits: options.categoryAxisDisplayUnits,
         });
-
+        // console.log("xAxisProperties",xAxisProperties);
         xAxisProperties.axisLabel = metaDataColumn.displayName;
         return xAxisProperties;
     }
@@ -1917,6 +1949,9 @@ export class Gantt implements IVisual {
         this.axisGroup
             .selectAll(".tick text")
             .style("fill", (timestamp: number) => this.setTickColor(timestamp, axisTextColor));
+        var temp=this.axisGroup.selectAll(".tick text");
+        // console.log("Axis Groups",temp);
+        this.axisGroup.selectAll(".tick text")
     }
 
     private setTickColor(
