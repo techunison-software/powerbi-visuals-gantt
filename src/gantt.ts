@@ -150,8 +150,8 @@ import { drawExpandButton, drawCollapseButton, drawMinusButton, drawPlusButton }
 const PercentFormat: string = "0.00 %;-0.00 %;0.00 %";
 const ScrollMargin: number = 100;
 const MillisecondsInASecond: number = 60000; // 1 Minute
-const MillisecondsInAMinute: number = 15 * MillisecondsInASecond; // 15 Minutes
-const MillisecondsInAHour: number = 4 * MillisecondsInAMinute; // 1 Hour
+const MillisecondsInAMinute: number = 5 * MillisecondsInASecond; // 15 Minutes
+const MillisecondsInAHour: number = 3 * MillisecondsInAMinute; // 1 Hour
 const MillisecondsInADay: number = 4 * MillisecondsInAHour; // 4 Hours 
 const MillisecondsInWeek: number = 3 * MillisecondsInADay; // 12 Hours
 const MillisecondsInAMonth: number = 2 * MillisecondsInADay; // 24 Hours
@@ -420,9 +420,9 @@ export class Gantt implements IVisual {
         const axisBackgroundColor: string = this.colorHelper.getThemeColor();
         // create div container to the whole viewport area
         this.visualFilterSelector=this.body.append("button").attr("name","intervalbtngrp").attr("id","1").html("1m");
-        this.body.append("button").attr("name","intervalbtngrp").attr("id","2").html("15m");
-        this.body.append("button").attr("name","intervalbtngrp").attr("id","3").html("1hr");
-        // this.body.append("button").attr("name","intervalbtngrp").attr("id","4").html("3hr");
+        this.body.append("button").attr("name","intervalbtngrp").attr("id","2").html("5m");
+        this.body.append("button").attr("name","intervalbtngrp").attr("id","3").html("15m");
+        this.body.append("button").attr("name","intervalbtngrp").attr("id","4").html("1hr");
         // this.body.append("button").attr("name","intervalbtngrp").attr("id","5").html("12hr");
         // this.body.append("button").attr("name","intervalbtngrp").attr("id","6").html("24hr");
         // this.body.append("div").style("padding-left","45%").append("div").attr("name","ganttTimelineStartText").attr("id","ganttTimelineStartText").html("01/07/2020"+" - "+"01/08/2020").style("align","center");
@@ -1499,7 +1499,7 @@ export class Gantt implements IVisual {
         d3.selectAll("[name=intervalbtngrp]").on("click", function () {
             customInterval=d3.select(this).attr("id");
             // customInterval=d3.select(this).attr("value");
-            console.log("customInterval",customInterval);
+            // console.log("customInterval",customInterval);
             // console.log("this.initOptions",initOptions);
             self.update(initOptions);
             // console.log("Hello");
@@ -1622,7 +1622,7 @@ export class Gantt implements IVisual {
             ganttTimelineStart=startDate.getFullYear().toString()+"-"+"0"+calcmonth+"-"+"0"+startDate.getDate().toString();
             calcmonth=endDate.getMonth()+1;
             ganttTimelineEnd=endDate.getFullYear()+"-0"+calcmonth+"-0"+endDate.getDate().toString();
-            console.log("ganttTimelineStart",ganttTimelineStart,"ganttTimelineEnd",ganttTimelineEnd);
+            // console.log("ganttTimelineStart",ganttTimelineStart,"ganttTimelineEnd",ganttTimelineEnd);
             let ticks: number = Math.ceil(Math.round(endDate.valueOf() - startDate.valueOf()) / dateTypeMilliseconds);
             ticks = ticks < 4 ? 4 : ticks;
 
@@ -3009,6 +3009,25 @@ export class Gantt implements IVisual {
         this.tooltipServiceWrapper.addTooltip(
             selection,
             (tooltipEvent: TooltipEventArgs<TooltipEnabledDataPoint>) => {
+                tooltipEvent.data.tooltipInfo[0].displayName="Batch Job";
+                tooltipEvent.data.tooltipInfo[1].displayName="Job Start Date-Time";
+                tooltipEvent.data.tooltipInfo[2].displayName="Job End Date-Time";
+                tooltipEvent.data.tooltipInfo[3].displayName="Total Execution Time";
+                tooltipEvent.data.tooltipInfo[4].displayName="Wait Time (%) ";
+                let tempval=tooltipEvent.data.tooltipInfo[3].value;
+        
+                // tempval.indexOf("Visual_DurationUnit_Minutes");
+                if(tooltipEvent.data.tooltipInfo[3].value.indexOf("Visual_DurationUnit_Seconds")!=-1 || tooltipEvent.data.tooltipInfo[3].value.indexOf("Visual_DurationUnit_Minutes")!=-1)
+                {
+                tempval=tooltipEvent.data.tooltipInfo[3].value.substring(tooltipEvent.data.tooltipInfo[3].value.indexOf("Visual_DurationUnit_Seconds")-3,tooltipEvent.data.tooltipInfo[3].value.indexOf("Visual_DurationUnit_Seconds"))+"Seconds";
+                }
+                if(tooltipEvent.data.tooltipInfo[3].value.indexOf("Visual_DurationUnit_Minutes")!=-1)
+                {
+                tempval=tooltipEvent.data.tooltipInfo[3].value.substring(0,tooltipEvent.data.tooltipInfo[3].value.indexOf("Visual_DurationUnit_Minutes"))+"Minutes "+tempval;
+                }
+                console.log("tempval",tempval);
+                tooltipEvent.data.tooltipInfo[3].value=tempval;
+                console.log("tooltipEvent.data.tooltipInfo",tooltipEvent.data.tooltipInfo);
                 return tooltipEvent.data.tooltipInfo;
             });
     }
