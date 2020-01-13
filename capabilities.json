@@ -314,16 +314,16 @@
             "displayName": "General",
             "displayNameKey": "Visual_General",
             "properties": {
+                "filter": {
+                    "type": {
+                        "filter": true
+                    }
+                },
                 "groupTasks": {
                     "displayName": "Group Tasks",
                     "displayNameKey": "Visual_GroupTasks",
                     "type": {
                         "bool": true
-                    }
-                },
-                "filter":{
-                    "type":{
-                        "filter":true
                     }
                 },
                 "scrollToCurrentTime": {

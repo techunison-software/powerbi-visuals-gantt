@@ -29,11 +29,12 @@ import "./../style/gantt.less";
 import * as d3 from "d3";
 import * as _ from "lodash";
 import powerbi from "powerbi-visuals-api";
+import {AdvancedFilter, IAdvancedFilter} from "powerbi-models";
+
 
 // d3
 type Selection<T1, T2 = T1> = d3.Selection<any, T1, any, T2>;
 import timeScale = d3.ScaleTime;
-
 
 // powerbi
 import DataView = powerbi.DataView;
@@ -105,10 +106,10 @@ import LegendPosition = legendInterfaces.LegendPosition;
 import LegendData = legendInterfaces.LegendData;
 import createLegend = LegendModule.createLegend;
 import LegendDataPoint = legendInterfaces.LegendDataPoint;
-import * as powerbi_models from "powerbi-models";
 
 // powerbi.extensibility.utils.chart
 import IAxisProperties = axisInterfaces.IAxisProperties;
+
 
 // behavior
 import { Behavior, BehaviorOptions } from "./behavior";
@@ -168,9 +169,13 @@ const GanttDurationUnitType = [
     "hour",
     "day",
 ];
-let customInterval:String="";
-
 let initOptions:VisualUpdateOptions=null;
+let customInterval:String="";
+let ganttTimelineStart:string="";
+let ganttTimelineEnd:string="";
+
+
+
 
 export enum ResourceLabelPositions {
     Top = <any>"Top",
@@ -260,8 +265,6 @@ export class Gantt implements IVisual {
     private colorHelper: ColorHelper;
     private legend: ILegend;
 
-
-    
     private textProperties: TextProperties = {
         fontFamily: "wf_segoe-ui_normal",
         fontSize: PixelConverter.toString(9),
@@ -366,7 +369,6 @@ export class Gantt implements IVisual {
     private lineGroupWrapper: Selection<any>;
     private clearCatcher: Selection<any>;
     private ganttDiv: Selection<any>;
-    private visualFilterDiv: Selection<any>;
     private visualFilterSelector: Selection<any>;
     private behavior: Behavior;
     private interactivityService: IInteractivityService<Task | LegendDataPoint>;
@@ -382,7 +384,7 @@ export class Gantt implements IVisual {
     private groupLabelSize: number = 25;
     private secondExpandAllIconOffset: number = 7;
     private hasNotNullableDates: boolean = false;
-    public dateTypeMilliseconds: number = 1;
+    
 
     constructor(options: VisualConstructorOptions) {
         if (window.location !== window.parent.location) {
@@ -405,57 +407,28 @@ export class Gantt implements IVisual {
 
         this.createViewport(options.element);
         this.customEventHandler();
+        // this.updateOnRangeSelectonChange();
+
     }
 
     /**
      * Create the viewport area of the gantt chart
      */
-    public updateOnRangeSelectonChange(): void {
-        // this.clearAllDiscreteSelections();
-        let categories: powerbi.DataViewCategoricalColumn= initOptions.dataViews[0].categorical.categories[0]
-
-        let target: IFilterColumnTarget = {
-            table: categories.source.queryName.substr(0, categories.source.queryName.indexOf('.')), // table
-            column: categories.source.displayName // col1
-        };
-        
-        // let value: ValueRange<number> = this.scalableRange.getValue();
-        // if (!value.min && !value.max) {
-        //     return;
-        // }
-
-        let conditions: IAdvancedFilterCondition[] = [];
-        // let target: IFilterColumnTarget = this.callbacks.getAdvancedFilterColumnTarget();
-
-            conditions.push({
-                operator: "GreaterThan",
-                value: new Date("01/01/2020")
-            });
-        
-            conditions.push({
-                operator: "LessThan",
-                value: new Date("07/01/2020")
-            });
-        
-        let filter: IAdvancedFilter = new window['powerbi-models'].AdvancedFilter(target, "And", conditions);
-        this.host.applyJsonFilter(filter, "general", "filter", new window['powerbi-models'].FilterAction.merge);
-    }
     private createViewport(element: HTMLElement): void {
-        let self:Gantt = this;
+        let self = this;
         const isHighContrast: boolean = this.colorHelper.isHighContrast;
         const axisBackgroundColor: string = this.colorHelper.getThemeColor();
         // create div container to the whole viewport area
         this.visualFilterSelector=this.body.append("button").attr("name","intervalbtngrp").attr("id","1").html("1m");
         this.body.append("button").attr("name","intervalbtngrp").attr("id","2").html("15m");
         this.body.append("button").attr("name","intervalbtngrp").attr("id","3").html("1hr");
-        this.body.append("button").attr("name","intervalbtngrp").attr("id","4").html("3hr");
-        this.body.append("button").attr("name","intervalbtngrp").attr("id","5").html("12hr");
-        this.body.append("button").attr("name","intervalbtngrp").attr("id","6").html("24hr");
-
+        // this.body.append("button").attr("name","intervalbtngrp").attr("id","4").html("3hr");
+        // this.body.append("button").attr("name","intervalbtngrp").attr("id","5").html("12hr");
+        // this.body.append("button").attr("name","intervalbtngrp").attr("id","6").html("24hr");
+        // this.body.append("div").style("padding-left","45%").append("div").attr("name","ganttTimelineStartText").attr("id","ganttTimelineStartText").html("01/07/2020"+" - "+"01/08/2020").style("align","center");
+        
         this.ganttDiv = this.body.append("div")
             .classed(Selectors.Body.className, true);
-            // console.log("visualTitle",d3.select(".visualTitle"));
-            
 
         // create container to the svg area
         this.ganttSvg = this.ganttDiv
@@ -525,41 +498,9 @@ export class Gantt implements IVisual {
             true,
             LegendPosition.Top,
             interactiveBehavior);
-            // let self1:Gantt=this;
 
         this.ganttDiv.on("scroll", function (evt) {
-            console.log("Updating Date Range")
-            // console.log(d3.selectAll(".preTextWithEllipsis"));
-            self.updateOnRangeSelectonChange();
-            var endScroll=this.scrollLeft/this.scrollWidth;
-            // console.log("endScroll",endScroll);
             
-            // if(this.scrollLeft  this.scrollWidth) console.log("end of scroll :" + this.scrollWidth);
-            let categories: powerbi.DataViewCategoricalColumn = initOptions.dataViews[0].categorical.categories[0];
-            // debugger;
-
-            let target: powerbi_models.IFilterColumnTarget = {
-                table: "DimDateTime", // table
-                column: "DateTimeKey" // col1
-            };
-            // console.log("target",target);
-
-            let conditions: powerbi_models.IAdvancedFilterCondition[] = [];
-
-            conditions.push({
-                operator: "GreaterThanOrEqual",
-                value: '2020010210'
-            });
-            conditions.push({
-                operator: "LessThanOrEqual",
-                value: '2020010211'
-            });
-
-            // let filter: powerbi_models.IAdvancedFilter = new window['powerbi-models'].AdvancedFilter(target, "And", conditions);
-
-            // // invoke the filter
-            // this.host.applyJsonFilter(filter, "general", "filter", new window['powerbi-models'].FilterAction.merge);
-
             if (self.viewModel) {
                 const taskLabelsWidth: number = self.viewModel.settings.taskLabels.show
                     ? self.viewModel.settings.taskLabels.width
@@ -570,9 +511,11 @@ export class Gantt implements IVisual {
                     .attr("transform", SVGManipulations.translate(this.scrollLeft, 0))
                     .attr("height", 20);
             }
+            // self.updateOnRangeSelectonChange();
         }, false);
+             
     }
-    
+
     /**
      * Clear the viewport area
      */
@@ -1550,33 +1493,34 @@ export class Gantt implements IVisual {
 
         return axisLength;
     }
-    
-    /**
-    * Called on data change or resizing
-    * @param options The visual option that contains the dataview and the viewport
-    */
     public customEventHandler():void{
         let self: Gantt = this;
         this.ganttDiv.attr("name","ganttDiv");
         d3.selectAll("[name=intervalbtngrp]").on("click", function () {
             customInterval=d3.select(this).attr("id");
-            // console.log("customInterval",customInterval);
+            // customInterval=d3.select(this).attr("value");
+            console.log("customInterval",customInterval);
             // console.log("this.initOptions",initOptions);
             self.update(initOptions);
             // console.log("Hello");
             // Gantt.
 
-        });    
+        });
+            
     }
+    /**
+    * Called on data change or resizing
+    * @param options The visual option that contains the dataview and the viewport
+    */
     public update(options: VisualUpdateOptions): void {
         if (!options || !options.dataViews || !options.dataViews[0]) {
             this.clearViewport();
             return;
         }
         initOptions=options;
-        
+
         this.viewModel = Gantt.converter(options.dataViews[0], this.host, this.colors, this.colorHelper, this.localizationManager);
-        // console.log("options",options);
+
         // for dublicated milestone types
         if (this.viewModel && this.viewModel.milestonesData) {
             let newMilestoneData: MilestoneData = this.viewModel.milestonesData;
@@ -1638,44 +1582,48 @@ export class Gantt implements IVisual {
         if (this.hasNotNullableDates) {
             let startDate: Date = minDateTask.start;
             let endDate: Date = maxDateTask.end;
-
             if (startDate.toString() === endDate.toString()) {
                 endDate = new Date(endDate.valueOf() + (24 * 60 * 60 * 1000));
             }
+
+            let dateTypeMilliseconds: number = Gantt.getDateType(settings.dateType.type);
             switch(customInterval)
             {
                 case "1":
-                    this.dateTypeMilliseconds= MillisecondsInASecond;
+                    dateTypeMilliseconds= MillisecondsInASecond;
                     // ticks=20;
                     break;
                 case "2":
-                    this.dateTypeMilliseconds= MillisecondsInAMinute;
+                    dateTypeMilliseconds= MillisecondsInAMinute;
                     // ticks=20;
                     break;
                 case "3":
-                    this.dateTypeMilliseconds= MillisecondsInAHour;
+                    dateTypeMilliseconds= MillisecondsInAHour;
                     // ticks=20;
                     break;
                 case "4":
-                    this.dateTypeMilliseconds=MillisecondsInADay;
+                    dateTypeMilliseconds=MillisecondsInADay;
                     // ticks=20;
                     break;
                 case "5":
-                    this.dateTypeMilliseconds=MillisecondsInWeek;
+                    dateTypeMilliseconds=MillisecondsInWeek;
                     // ticks=20;
                     break;
                 case "6":
-                    this.dateTypeMilliseconds=MillisecondsInWeek;
+                    dateTypeMilliseconds=MillisecondsInWeek;
                     // ticks=20;
                     break;
                 default:
-                    this.dateTypeMilliseconds= Gantt.getDateType(settings.dateType.type);
+                    dateTypeMilliseconds= Gantt.getDateType(settings.dateType.type);
                     // ticks=10;
                     break;
             }
-            let ticks: number = Math.ceil(Math.round(endDate.valueOf() - startDate.valueOf()) / this.dateTypeMilliseconds);
-            // let ticks: number = 20;
-            // console.log("ticks",ticks,"startDate",startDate,startDate.valueOf(),"endDate",endDate,endDate.valueOf(),"dateTypeMilliseconds",this.dateTypeMilliseconds);
+            var calcmonth=startDate.getMonth()+1;
+            ganttTimelineStart=startDate.getFullYear().toString()+"-"+"0"+calcmonth+"-"+"0"+startDate.getDate().toString();
+            calcmonth=endDate.getMonth()+1;
+            ganttTimelineEnd=endDate.getFullYear()+"-0"+calcmonth+"-0"+endDate.getDate().toString();
+            console.log("ganttTimelineStart",ganttTimelineStart,"ganttTimelineEnd",ganttTimelineEnd);
+            let ticks: number = Math.ceil(Math.round(endDate.valueOf() - startDate.valueOf()) / dateTypeMilliseconds);
             ticks = ticks < 4 ? 4 : ticks;
 
             axisLength = ticks * Gantt.DefaultTicksLength;
@@ -1690,6 +1638,8 @@ export class Gantt implements IVisual {
             this.timeScale = <timeScale<Date, Date>>xAxisProperties.scale;
 
             this.renderAxis(xAxisProperties);
+            // this.updateOnRangeSelectonChange();
+
         }
 
         axisLength = this.scaleAxisLength(axisLength);
@@ -1838,7 +1788,7 @@ export class Gantt implements IVisual {
             scaleType: options.categoryAxisScaleType,
             axisDisplayUnits: options.categoryAxisDisplayUnits,
         });
-        // console.log("xAxisProperties",xAxisProperties);
+
         xAxisProperties.axisLabel = metaDataColumn.displayName;
         return xAxisProperties;
     }
@@ -1949,9 +1899,6 @@ export class Gantt implements IVisual {
         this.axisGroup
             .selectAll(".tick text")
             .style("fill", (timestamp: number) => this.setTickColor(timestamp, axisTextColor));
-        var temp=this.axisGroup.selectAll(".tick text");
-        // console.log("Axis Groups",temp);
-        this.axisGroup.selectAll(".tick text")
     }
 
     private setTickColor(
@@ -3196,5 +3143,45 @@ export class Gantt implements IVisual {
             (instanceEnumeration as VisualObjectInstance[]).push(instance);
         }
     }
+    
+//     public updateOnRangeSelectonChange(): void {
+//         // this.clearAllDiscreteSelections();
+//         console.log("hello");
+//         let categories: powerbi.DataViewCategoricalColumn= initOptions.dataViews[0].categorical.categories[0]
 
+//         // let target: IFilterColumnTarget = {
+//         //     table: categories.source.queryName.substr(0, categories.source.queryName.indexOf('.')), // table
+//         //     column: categories.source.displayName // col1
+//         // };
+//         let target: IFilterColumnTarget = {
+//             table: "FactSubmittedJobs", // table
+//             column: "EnvironmentKey" // col1
+//         };
+//         console.log("target",target);
+//         // let value: ValueRange<number> = this.scalableRange.getValue();
+//         // if (!value.min && !value.max) {
+//         //     return;
+//         // }
+
+//         let conditions: IAdvancedFilterCondition[] = [];
+//         // let target: IFilterColumnTarget = this.callbacks.getAdvancedFilterColumnTarget();
+
+//             conditions.push({
+//                 operator: "GreaterThan",
+//                 value: "1"
+//             });
+        
+//             conditions.push({
+//                 operator: "LessThan",
+//                 value: "2"
+//             });
+            
+//         let filter: AdvancedFilter = new AdvancedFilter(target, "And", conditions);
+//         this.host.applyJsonFilter(filter, "general", "filter", powerbi.FilterAction.merge);
+        
+//         // let filter: IAdvancedFilter = new window['powerbi-models'].AdvancedFilter(target, "And", conditions);
+//         // let filter: IBasicFilter = new window['powerbi-models'].BasicFilter(target, "In", [1,2,3]);
+
+//         // this.host.applyJsonFilter(filter, "general", "filter", new window['powerbi-models'].FilterAction.merge);
+//     }
 }

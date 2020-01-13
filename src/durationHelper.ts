@@ -99,7 +99,7 @@ export class DurationHelper {
         duration: number,
         newDurationUnit: string | DurationUnits,
         stepDurationTransformation: number): number {
-            console.log("stepDurationTransformation",stepDurationTransformation)
+
         if (stepDurationTransformation === null || typeof stepDurationTransformation === "undefined") {
             return Math.floor(duration);
         }
@@ -120,8 +120,7 @@ export class DurationHelper {
                         : SecondsInAMinute);
                 break;
         }
-        console.log("stepDurationTransformation",stepDurationTransformation);
-        console.log("transformedDuration",transformedDuration);
+
         return Math.floor(transformedDuration);
     }
 
