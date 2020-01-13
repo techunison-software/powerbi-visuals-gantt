@@ -173,6 +173,9 @@ let initOptions:VisualUpdateOptions=null;
 let customInterval:String="";
 let ganttTimelineStart:string="";
 let ganttTimelineEnd:string="";
+let taskTimings=[];
+let previousGanttDivYScroll:number=1;
+
 
 
 
@@ -307,10 +310,10 @@ export class Gantt implements IVisual {
         IconWidth: 15,
         ChildTaskLeftMargin: 25,
         ParentTaskLeftMargin: 0,
-        DefaultDateType: "Week",
+        DefaultDateType: "Second",
         DateFormatStrings: {
-            Second: "HH:mm:ss",
-            Minute: "HH:mm",
+            Second: "HH:mm:ss (dd)",
+            Minute: "HH:mm (dd)",
             Hour: "HH:mm (dd)",
             Day: "MMM dd",
             Week: "MMM dd",
@@ -500,8 +503,24 @@ export class Gantt implements IVisual {
             interactiveBehavior);
 
         this.ganttDiv.on("scroll", function (evt) {
-            
-            if (self.viewModel) {
+            console.log("ScrollLeft",this.scrollLeft,"ScrollTop",this.scrollTop);
+            let previousGanttDivYScrollPercent=previousGanttDivYScroll * 1.0 /this.scrollTop
+            previousGanttDivYScrollPercent=Math.abs(1-previousGanttDivYScrollPercent);
+            // previousGanttDivYScroll=this.scrollTop;
+            if(this.scrollTop>previousGanttDivYScroll)
+            {
+                for(var i=0;i<taskTimings.length;i++)
+                {
+                    if(this.scrollTop > taskTimings[i].y)
+                    {
+                        var currentXScroll=taskTimings[i].x+(previousGanttDivYScrollPercent*taskTimings[i].x);
+                        this.scroll(currentXScroll,this.scrollTop);
+                        console.log("previousGanttDivYScrollPercent",previousGanttDivYScrollPercent,"taskTimings",taskTimings[i]);
+                        // break;
+                    }
+                }
+            }
+                if (self.viewModel) {
                 const taskLabelsWidth: number = self.viewModel.settings.taskLabels.show
                     ? self.viewModel.settings.taskLabels.width
                     : 0;
@@ -1496,6 +1515,7 @@ export class Gantt implements IVisual {
     public customEventHandler():void{
         let self: Gantt = this;
         this.ganttDiv.attr("name","ganttDiv");
+        this.ganttDiv.attr("id","ganttDiv");
         d3.selectAll("[name=intervalbtngrp]").on("click", function () {
             customInterval=d3.select(this).attr("id");
             // customInterval=d3.select(this).attr("value");
@@ -2317,15 +2337,21 @@ export class Gantt implements IVisual {
      * @param taskConfigHeight
      */
     private drawTaskRect(task: Task, taskConfigHeight: number): string {
-        const x = this.hasNotNullableDates ? this.timeScale(task.start) : 0,
+            taskTimings=[];
+            const x = this.hasNotNullableDates ? this.timeScale(task.start) : 0,
             y = Gantt.getBarYCoordinate(task.index, taskConfigHeight) + (task.index + 1) * this.getResourceLabelTopMargin(),
             width = this.getTaskRectWidth(task),
             height = Gantt.getBarHeight(taskConfigHeight),
             radius = Gantt.RectRound;
+            var taskcoordinates={x:null,y:null};
+            taskcoordinates.x=x;
+            taskcoordinates.y=y;
+            taskTimings.push(taskcoordinates);
 
         if (width < 2 * radius) {
             return drawNotRoundedRectByPath(x, y, width, height);
         }
+        console.log("taskcoordinates",taskcoordinates,"taskTimings",taskTimings);
         return drawRoundedRectByPath(x, y, width + Gantt.RectRound, height, radius);
     }
 
