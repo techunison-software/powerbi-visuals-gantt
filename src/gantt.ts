@@ -2257,18 +2257,49 @@ export class Gantt implements IVisual {
                 if (_.includes(this.collapsedTasks, currentTaskName)) {
                     const firstTask: Task = groupedTask.tasks && groupedTask.tasks[0];
                     const tasks = groupedTask.tasks;
-                    tasks.forEach((task: Task) => {
-                        if (task.children) {
-                            const childrenColors = task.children.map((child: Task) => child.color).filter((color) => color);
-                            const minChildDateStart = _.min(task.children.map((child: Task) => child.start).filter((dateStart) => dateStart));
-                            const maxChildDateEnd = _.max(task.children.map((child: Task) => child.end).filter((dateStart) => dateStart));
-                            firstTask.color = !firstTask.color && task.children ? childrenColors[0] : firstTask.color;
-                            firstTask.start = _.min([firstTask.start, minChildDateStart]);
-                            firstTask.end = <any>_.max([firstTask.end, maxChildDateEnd]);
+                    // tasks.forEach((task: Task) => {
+                    //    if (task.children) {
+                    //        const childrenColors = task.children.map((child: Task) => child.color).filter((color) => color);
+                    //        const minChildDateStart = _.min(task.children.map((child: Task) => child.start).filter((dateStart) => dateStart));
+                    //        const maxChildDateEnd = _.max(task.children.map((child: Task) => child.end).filter((dateStart) => dateStart));
+                    //        firstTask.color = !firstTask.color && task.children ? childrenColors[0] : firstTask.color;
+                    //        firstTask.start = _.min([firstTask.start, minChildDateStart]);
+                    //        firstTask.end = <any>_.max([firstTask.end, maxChildDateEnd]);
+                    //    }
+                    // });
+					if(firstTask && firstTask.children){
+                        const childrenColors = firstTask.children.map((child: Task) => child.color).filter((color) => color);
+                        firstTask.start = firstTask.children[0].start;
+                        firstTask.end = firstTask.children[0].end;
+                        firstTask.completion = firstTask.children[0].completion;
+                        for(let index: number = 1; index < firstTask.children.length; index++){
+                            groupedTask.tasks.push({
+                                index: firstTask.index,
+                                name: firstTask.name,
+                                start: firstTask.children[index].start,
+                                end: firstTask.children[index].end,
+                                completion: firstTask.children[index].completion,
+                                color:firstTask.children[index].color,
+                                duration:firstTask.children[index].duration,
+                                parent:null,
+                                children:null,
+                                visibility:false,
+                                resource:firstTask.children[index].resource,
+                                taskType:firstTask.children[index].taskType,
+                                description:firstTask.children[index].description,
+                                tooltipInfo:firstTask.children[index].tooltipInfo,
+                                selected:null,
+                                identity:null,
+                                // extraInformation:_.includes(collapsedTasks, firstTask.name) ? firstTask.children[index].extraInformation : null,
+                                extraInformation:null,
+                                daysOffList:firstTask.children[index].daysOffList,
+                                wasDowngradeDurationUnit:firstTask.children[index].wasDowngradeDurationUnit,
+                                stepDurationTransformation:firstTask.children[index].stepDurationTransformation,
+                                Milestones:firstTask.children[index].Milestones
+                            })
                         }
-                    });
-
-                    groupedTask.tasks = firstTask && [firstTask] || [];
+                    }
+                    // groupedTask.tasks = firstTask && [firstTask] || [];
                 }
             });
         }
