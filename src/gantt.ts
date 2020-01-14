@@ -504,6 +504,7 @@ export class Gantt implements IVisual {
 
         this.ganttDiv.on("scroll", function (evt) {
             console.log("ScrollLeft",this.scrollLeft,"ScrollTop",this.scrollTop);
+            console.log("tasktimings",taskTimings);
             let previousGanttDivYScrollPercent=previousGanttDivYScroll * 1.0 /this.scrollTop
             previousGanttDivYScrollPercent=Math.abs(1-previousGanttDivYScrollPercent);
             // previousGanttDivYScroll=this.scrollTop;
@@ -2337,7 +2338,7 @@ export class Gantt implements IVisual {
      * @param taskConfigHeight
      */
     private drawTaskRect(task: Task, taskConfigHeight: number): string {
-            taskTimings=[];
+            // taskTimings=[];
             const x = this.hasNotNullableDates ? this.timeScale(task.start) : 0,
             y = Gantt.getBarYCoordinate(task.index, taskConfigHeight) + (task.index + 1) * this.getResourceLabelTopMargin(),
             width = this.getTaskRectWidth(task),
@@ -2351,7 +2352,7 @@ export class Gantt implements IVisual {
         if (width < 2 * radius) {
             return drawNotRoundedRectByPath(x, y, width, height);
         }
-        console.log("taskcoordinates",taskcoordinates,"taskTimings",taskTimings);
+        console.log("taskcoordinates",taskcoordinates);
         return drawRoundedRectByPath(x, y, width + Gantt.RectRound, height, radius);
     }
 
