@@ -3144,10 +3144,12 @@ export class Gantt implements IVisual {
                 tooltipEvent.data.tooltipInfo[1].displayName="Job Start Date-Time";
                 tooltipEvent.data.tooltipInfo[2].displayName="Job End Date-Time";
                 tooltipEvent.data.tooltipInfo[3].displayName="Total Execution Time";
+                
                 if(typeof(tooltipEvent.data.tooltipInfo[4])!="undefined")
-                {
                     tooltipEvent.data.tooltipInfo[4].displayName="Wait Time (%) ";
-                }
+                else
+                    tooltipEvent.data.tooltipInfo[4]={displayName:"Wait Time (%) ",value:"0.00"};
+                
                 let tempval=tooltipEvent.data.tooltipInfo[3].value;
         
                 // tempval.indexOf("Visual_DurationUnit_Minutes");
