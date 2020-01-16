@@ -329,7 +329,7 @@ export class Gantt implements IVisual {
 
     private static DefaultGraphicWidthPercentage: number = 0.78;
     private static ResourceLabelDefaultDivisionCoefficient: number = 1.5;
-    private static DefaultTicksLength: number = 50;
+    private static DefaultTicksLength: number = 130;
     private static DefaultDuration: number = 250;
     private static TaskLineCoordinateX: number = 15;
     private static AxisLabelClip: number = 40;
@@ -432,7 +432,7 @@ export class Gantt implements IVisual {
         this.body.append("button").attr("name","intervalbtngrp").attr("id","btn-1m").html("1m");
         this.body.append("button").attr("name","intervalbtngrp").attr("id","btn-5m").html("5m");
         this.body.append("button").attr("name","intervalbtngrp").attr("id","btn-15m").html("15m");
-        this.body.append("button").attr("name","intervalbtngrp").attr("id","btn-1h").html("1h");
+        this.body.append("button").attr("name","intervalbtngrp").attr("id","btn-1h").html("1h").classed("btnclicked",true);
         this.filterDateText=this.body.append("div").style("padding-left","45%").append("div").attr("name","ganttTimelineStartText").attr("id","ganttTimelineStartText").html("").style("align","center");
         
         this.ganttDiv = this.body.append("div")
@@ -519,8 +519,8 @@ export class Gantt implements IVisual {
             //     {
             //         if(this.scrollTop > taskTimings[i].y)
             //         {
-            //             var currentXScroll=taskTimings[i].x+(previousGanttDivYScrollPercent*taskTimings[i].x);
-            //             this.scroll(currentXScroll,this.scrollTop);
+            //             //var currentXScroll=taskTimings[i].x+(previousGanttDivYScrollPercent*taskTimings[i].x);
+            //             this.scroll(taskTimings[i].x,this.scrollTop);
             //             console.log("previousGanttDivYScrollPercent",previousGanttDivYScrollPercent,"taskTimings",taskTimings[i]);
             //             // break;
             //         }
@@ -532,8 +532,8 @@ export class Gantt implements IVisual {
             //     {
             //         if(this.scrollTop < taskTimings[i].y)
             //         {
-            //             currentXScroll=taskTimings[i].x-(previousGanttDivYScrollPercent*taskTimings[i].x);
-            //             this.scroll(currentXScroll,this.scrollTop);
+            //             //currentXScroll=taskTimings[i].x-(previousGanttDivYScrollPercent*taskTimings[i].x);
+            //             this.scroll(taskTimings[i].x,this.scrollTop);
             //             console.log("previousGanttDivYScrollPercent",previousGanttDivYScrollPercent,"taskTimings",taskTimings[i]);
             //             // break;
             //         }
@@ -608,7 +608,7 @@ export class Gantt implements IVisual {
      */
     private updateChartSize(): void {
         this.ganttDiv
-            .style("height", PixelConverter.toString(this.viewport.height))
+            .style("height", PixelConverter.toString(this.viewport.height - 50))
             .style("width", PixelConverter.toString(this.viewport.width));
     }
 
@@ -1559,7 +1559,6 @@ export class Gantt implements IVisual {
             this.clearViewport();
             return;
         }
-        
         initOptions=options;
         console.log("initOptions",initOptions);
         taskTimings=[];
@@ -1880,7 +1879,7 @@ export class Gantt implements IVisual {
             getValueFn: (index) => {
                 // let tempval=xAxisDateFormatter.format(new Date(index));
                 let time = new Date(index);
-                let tempval=time.toLocaleString('en-US', { year: 'numeric', month: 'numeric', day:'numeric', hour: 'numeric', minute: 'numeric', hour12: true })
+                let tempval=time.toLocaleString('en-US', { year: 'numeric', month: 'numeric', day:'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: true })
                 // let datestring:string[]=tempval.split("(");
                 // tempval=datestring[0]+"\n"+datestring[1];
                 // console.log("Tempval Before",datestring);
