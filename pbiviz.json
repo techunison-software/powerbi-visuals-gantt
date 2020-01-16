@@ -1,8 +1,8 @@
 {
   "visual": {
     "name": "CustomGantt",
-    "displayName": "CustomGantt 2.2.3-custom",
-    "guid": "Gantt1448688115700",
+    "displayName": "CustomGantt 2.2.3-custom-dev",
+    "guid": "GanttDev1448688115701",
     "visualClassName": "Gantt",
     "version": "2.2.3-custom",
     "description": "A Gantt chart is a type of bar chart which illustrates a project timeline or schedule. The Gantt Chart visual shows the Tasks, Start Dates, Durations, % Complete, and Resources for a project. The Gantt Chart visual can be used to show current schedule status using percent-complete shadings and a vertical \"TODAY\" line. The Legend may be used to group or filter tasks based upon data values.",

@@ -149,11 +149,11 @@ import { drawExpandButton, drawCollapseButton, drawMinusButton, drawPlusButton }
 
 const PercentFormat: string = "0.00 %;-0.00 %;0.00 %";
 const ScrollMargin: number = 100;
-const MillisecondsInASecond: number = 60000; // 1 Minute
-const MillisecondsInAMinute: number = 5 * MillisecondsInASecond; // 15 Minutes
-const MillisecondsInAHour: number = 3 * MillisecondsInAMinute; // 1 Hour
-const MillisecondsInADay: number = 4 * MillisecondsInAHour; // 4 Hours 
-const MillisecondsInWeek: number = 3 * MillisecondsInADay; // 12 Hours
+const MillisecondsInASecond: number = 15000; // 15 Seconds
+const MillisecondsInAMinute: number = 2 * MillisecondsInASecond; // 30 Seconds
+const MillisecondsInAHour: number = 2 * MillisecondsInAMinute; // 1 Minute
+const MillisecondsInADay: number = 15 * MillisecondsInAHour; // 15 MInutes 
+const MillisecondsInWeek: number = 4 * MillisecondsInADay; // 1 Hour
 const MillisecondsInAMonth: number = 2 * MillisecondsInADay; // 24 Hours
 const MillisecondsInAYear: number = 365 * MillisecondsInADay; // 1 Year
 const MillisecondsInAQuarter: number = MillisecondsInAYear / 4; // 1 Quarter
@@ -312,9 +312,9 @@ export class Gantt implements IVisual {
         ParentTaskLeftMargin: 0,
         DefaultDateType: "Second",
         DateFormatStrings: {
-            Second: "HH:mm:ss (dd)",
-            Minute: "HH:mm (dd)",
-            Hour: "HH:mm (dd)",
+            Second: "HH:mm:ss (MM - dd - yy)", // (MM - dd - yy)
+            Minute: "HH:mm (MM - dd - yy)",
+            Hour: "HH:mm (MM - dd - yy)",
             Day: "MMM dd",
             Week: "MMM dd",
             Month: "MMM yyyy",
@@ -373,6 +373,7 @@ export class Gantt implements IVisual {
     private clearCatcher: Selection<any>;
     private ganttDiv: Selection<any>;
     private visualFilterSelector: Selection<any>;
+    private filterDateText: Selection<any>;
     private behavior: Behavior;
     private interactivityService: IInteractivityService<Task | LegendDataPoint>;
     private eventService: IVisualEventService;
@@ -422,13 +423,13 @@ export class Gantt implements IVisual {
         const isHighContrast: boolean = this.colorHelper.isHighContrast;
         const axisBackgroundColor: string = this.colorHelper.getThemeColor();
         // create div container to the whole viewport area
-        this.visualFilterSelector=this.body.append("button").attr("name","intervalbtngrp").attr("id","1").html("1m");
-        this.body.append("button").attr("name","intervalbtngrp").attr("id","2").html("5m");
-        this.body.append("button").attr("name","intervalbtngrp").attr("id","3").html("15m");
-        this.body.append("button").attr("name","intervalbtngrp").attr("id","4").html("1hr");
+        this.visualFilterSelector=this.body.append("button").attr("name","intervalbtngrp").attr("id","1").html("15s");
+        this.body.append("button").attr("name","intervalbtngrp").attr("id","2").html("30s");
+        this.body.append("button").attr("name","intervalbtngrp").attr("id","3").html("1m");
+        this.body.append("button").attr("name","intervalbtngrp").attr("id","4").html("15m");
         // this.body.append("button").attr("name","intervalbtngrp").attr("id","5").html("12hr");
         // this.body.append("button").attr("name","intervalbtngrp").attr("id","6").html("24hr");
-        // this.body.append("div").style("padding-left","45%").append("div").attr("name","ganttTimelineStartText").attr("id","ganttTimelineStartText").html("01/07/2020"+" - "+"01/08/2020").style("align","center");
+        this.filterDateText=this.body.append("div").style("padding-left","45%").append("div").attr("name","ganttTimelineStartText").attr("id","ganttTimelineStartText").html("").style("align","center");
         
         this.ganttDiv = this.body.append("div")
             .classed(Selectors.Body.className, true);
@@ -515,6 +516,19 @@ export class Gantt implements IVisual {
                     if(this.scrollTop > taskTimings[i].y)
                     {
                         var currentXScroll=taskTimings[i].x+(previousGanttDivYScrollPercent*taskTimings[i].x);
+                        this.scroll(currentXScroll,this.scrollTop);
+                        console.log("previousGanttDivYScrollPercent",previousGanttDivYScrollPercent,"taskTimings",taskTimings[i]);
+                        // break;
+                    }
+                }
+            }
+            else
+            {
+                for(var i=0;i<taskTimings.length;i++)
+                {
+                    if(this.scrollTop < taskTimings[i].y)
+                    {
+                        currentXScroll=taskTimings[i].x-(previousGanttDivYScrollPercent*taskTimings[i].x);
                         this.scroll(currentXScroll,this.scrollTop);
                         console.log("previousGanttDivYScrollPercent",previousGanttDivYScrollPercent,"taskTimings",taskTimings[i]);
                         // break;
@@ -1507,6 +1521,7 @@ export class Gantt implements IVisual {
 
     private scaleAxisLength(axisLength: number): number {
         let fullScreenAxisLength: number = Gantt.DefaultGraphicWidthPercentage * this.viewport.width;
+        // console.log("scaleAxisLength",axisLength,"fullScreenAxisLength",fullScreenAxisLength);
         if (axisLength < fullScreenAxisLength) {
             axisLength = fullScreenAxisLength;
         }
@@ -1523,6 +1538,8 @@ export class Gantt implements IVisual {
             // console.log("customInterval",customInterval);
             // console.log("this.initOptions",initOptions);
             self.update(initOptions);
+            d3.selectAll("[name=intervalbtngrp]").classed("btnclicked",false);
+            d3.select(this).classed("btnclicked",true)
             // console.log("Hello");
             // Gantt.
 
@@ -1538,7 +1555,10 @@ export class Gantt implements IVisual {
             this.clearViewport();
             return;
         }
+        
         initOptions=options;
+        console.log("initOptions",initOptions);
+        taskTimings=[];
 
         this.viewModel = Gantt.converter(options.dataViews[0], this.host, this.colors, this.colorHelper, this.localizationManager);
 
@@ -1639,14 +1659,64 @@ export class Gantt implements IVisual {
                     // ticks=10;
                     break;
             }
-            var calcmonth=startDate.getMonth()+1;
-            ganttTimelineStart=startDate.getFullYear().toString()+"-"+"0"+calcmonth+"-"+"0"+startDate.getDate().toString();
-            calcmonth=endDate.getMonth()+1;
-            ganttTimelineEnd=endDate.getFullYear()+"-0"+calcmonth+"-0"+endDate.getDate().toString();
+            const cultureSelector: string = this.host.locale;
+            let ganttDateTimeFormatter: IValueFormatter = ValueFormatter.create({
+                format: "MM/dd/yyyy hh:mm:ss",
+                cultureSelector
+            });
+            ganttTimelineStart=ganttDateTimeFormatter.format(startDate);
+            ganttTimelineEnd=ganttDateTimeFormatter.format(endDate);
+
+            // var calcmonth=startDate.getMonth()+1;
+            console.log("ganttDateTimeFormatter",ganttDateTimeFormatter.format(startDate));
+            // if(calcmonth<10)
+            // ganttTimelineStart="0"+calcmonth+"/";
+            // else
+            // ganttTimelineStart=calcmonth+"/";
+            
+            // if(startDate.getDate()<10)
+            // ganttTimelineStart=ganttTimelineStart+"0"+startDate.getDate()+"/"+startDate.getFullYear().toString();
+            // else
+            // ganttTimelineStart=ganttTimelineStart+startDate.getDate()+"/"+startDate.getFullYear().toString();
+            
+            // if (startDate.getHours()<10)
+            // ganttTimelineStart=ganttTimelineStart+" 0"+startDate.getHours();
+            // else
+            // ganttTimelineStart=ganttTimelineStart+ " "+startDate.getHours();
+            
+            // if (startDate.getMinutes()<10)
+            // ganttTimelineStart=ganttTimelineStart+":0"+startDate.getMinutes();
+            // else
+            // ganttTimelineStart=ganttTimelineStart+":"+startDate.getMinutes();
+
+            // calcmonth=endDate.getMonth()+1;
+
+            // if(calcmonth<10)
+            // ganttTimelineEnd="0"+calcmonth+"/";
+            // else
+            // ganttTimelineEnd=calcmonth+"/";
+
+            // if(endDate.getDate()<10)
+            // ganttTimelineEnd=ganttTimelineEnd+"0"+endDate.getDate()+"/"+endDate.getFullYear().toString();
+            // else
+            // ganttTimelineEnd=ganttTimelineEnd+endDate.getDate()+"/"+endDate.getFullYear().toString();
+
+            // if (endDate.getHours()<10)
+            // ganttTimelineEnd=ganttTimelineEnd+" 0"+endDate.getHours();
+            // else
+            // ganttTimelineEnd=ganttTimelineEnd+ " "+endDate.getHours();
+            
+            // if (endDate.getMinutes()<10)
+            // ganttTimelineEnd=ganttTimelineEnd+":0"+endDate.getMinutes();
+            // else
+            // ganttTimelineEnd=ganttTimelineEnd+":"+endDate.getMinutes();
+
+            // ganttTimelineEnd=endDate.getFullYear()+"-0"+calcmonth+"-0"+endDate.getDate().toString();
             // console.log("ganttTimelineStart",ganttTimelineStart,"ganttTimelineEnd",ganttTimelineEnd);
             let ticks: number = Math.ceil(Math.round(endDate.valueOf() - startDate.valueOf()) / dateTypeMilliseconds);
+            // console.log("ticks",ticks);
             ticks = ticks < 4 ? 4 : ticks;
-
+            this.filterDateText.html(ganttTimelineStart + " - " + ganttTimelineEnd)
             axisLength = ticks * Gantt.DefaultTicksLength;
             axisLength = this.scaleAxisLength(axisLength);
 
@@ -1656,8 +1726,9 @@ export class Gantt implements IVisual {
             };
 
             let xAxisProperties: IAxisProperties = this.calculateAxes(viewportIn, this.textProperties, startDate, endDate, ticks, false);
+            // console.log("xAxisProperties",xAxisProperties);
             this.timeScale = <timeScale<Date, Date>>xAxisProperties.scale;
-
+            // console.log("this.timeScale",this.timeScale);
             this.renderAxis(xAxisProperties);
             // this.updateOnRangeSelectonChange();
 
@@ -1804,12 +1875,17 @@ export class Gantt implements IVisual {
             useTickIntervalForDisplayUnits: true,
             isCategoryAxis: true,
             getValueFn: (index) => {
-                return xAxisDateFormatter.format(new Date(index));
+                let tempval=xAxisDateFormatter.format(new Date(index));
+                // let datestring:string[]=tempval.split("(");
+                // tempval=datestring[0]+"\n"+datestring[1];
+                // console.log("Tempval Before",datestring);
+                // console.log("Final Tempval",tempval);
+                return tempval;
             },
             scaleType: options.categoryAxisScaleType,
             axisDisplayUnits: options.categoryAxisDisplayUnits,
         });
-
+        // console.log("xAxisProperties",xAxisProperties);
         xAxisProperties.axisLabel = metaDataColumn.displayName;
         return xAxisProperties;
     }
@@ -1900,13 +1976,13 @@ export class Gantt implements IVisual {
     private renderAxis(xAxisProperties: IAxisProperties, duration: number = Gantt.DefaultDuration): void {
         const axisColor: string = this.viewModel.settings.dateType.axisColor;
         const axisTextColor: string = this.viewModel.settings.dateType.axisTextColor;
-
+        
         let xAxis = xAxisProperties.axis;
         this.axisGroup.call(xAxis.tickSizeOuter(xAxisProperties.outerPadding));
 
         this.axisGroup
             .transition()
-            .duration(duration)
+            .duration(210)
             .call(xAxis);
 
         this.axisGroup
@@ -1920,6 +1996,7 @@ export class Gantt implements IVisual {
         this.axisGroup
             .selectAll(".tick text")
             .style("fill", (timestamp: number) => this.setTickColor(timestamp, axisTextColor));
+        
     }
 
     private setTickColor(
@@ -2338,7 +2415,6 @@ export class Gantt implements IVisual {
      * @param taskConfigHeight
      */
     private drawTaskRect(task: Task, taskConfigHeight: number): string {
-            // taskTimings=[];
             const x = this.hasNotNullableDates ? this.timeScale(task.start) : 0,
             y = Gantt.getBarYCoordinate(task.index, taskConfigHeight) + (task.index + 1) * this.getResourceLabelTopMargin(),
             width = this.getTaskRectWidth(task),
@@ -2352,7 +2428,7 @@ export class Gantt implements IVisual {
         if (width < 2 * radius) {
             return drawNotRoundedRectByPath(x, y, width, height);
         }
-        console.log("taskcoordinates",taskcoordinates);
+        // console.log("taskcoordinates",taskcoordinates,"taskTimings",taskTimings);
         return drawRoundedRectByPath(x, y, width + Gantt.RectRound, height, radius);
     }
 
@@ -3052,9 +3128,9 @@ export class Gantt implements IVisual {
                 {
                 tempval=tooltipEvent.data.tooltipInfo[3].value.substring(0,tooltipEvent.data.tooltipInfo[3].value.indexOf("Visual_DurationUnit_Minutes"))+"Minutes "+tempval;
                 }
-                console.log("tempval",tempval);
+                // console.log("tempval",tempval);
                 tooltipEvent.data.tooltipInfo[3].value=tempval;
-                console.log("tooltipEvent.data.tooltipInfo",tooltipEvent.data.tooltipInfo);
+                // console.log("tooltipEvent.data.tooltipInfo",tooltipEvent.data.tooltipInfo);
                 return tooltipEvent.data.tooltipInfo;
             });
     }
