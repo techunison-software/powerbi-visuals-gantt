@@ -504,37 +504,37 @@ export class Gantt implements IVisual {
             interactiveBehavior);
 
         this.ganttDiv.on("scroll", function (evt) {
-            console.log("ScrollLeft",this.scrollLeft,"ScrollTop",this.scrollTop);
-            console.log("tasktimings",taskTimings);
-            let previousGanttDivYScrollPercent=previousGanttDivYScroll * 1.0 /this.scrollTop
-            previousGanttDivYScrollPercent=Math.abs(1-previousGanttDivYScrollPercent);
-            // previousGanttDivYScroll=this.scrollTop;
-            if(this.scrollTop>previousGanttDivYScroll)
-            {
-                for(var i=0;i<taskTimings.length;i++)
-                {
-                    if(this.scrollTop > taskTimings[i].y)
-                    {
-                        var currentXScroll=taskTimings[i].x+(previousGanttDivYScrollPercent*taskTimings[i].x);
-                        this.scroll(currentXScroll,this.scrollTop);
-                        console.log("previousGanttDivYScrollPercent",previousGanttDivYScrollPercent,"taskTimings",taskTimings[i]);
-                        // break;
-                    }
-                }
-            }
-            else
-            {
-                for(var i=0;i<taskTimings.length;i++)
-                {
-                    if(this.scrollTop < taskTimings[i].y)
-                    {
-                        currentXScroll=taskTimings[i].x-(previousGanttDivYScrollPercent*taskTimings[i].x);
-                        this.scroll(currentXScroll,this.scrollTop);
-                        console.log("previousGanttDivYScrollPercent",previousGanttDivYScrollPercent,"taskTimings",taskTimings[i]);
-                        // break;
-                    }
-                }
-            }
+            // console.log("ScrollLeft",this.scrollLeft,"ScrollTop",this.scrollTop);
+            // console.log("tasktimings",taskTimings);
+            // let previousGanttDivYScrollPercent=previousGanttDivYScroll * 1.0 /this.scrollTop
+            // previousGanttDivYScrollPercent=Math.abs(1-previousGanttDivYScrollPercent);
+            // // previousGanttDivYScroll=this.scrollTop;
+            // if(this.scrollTop>previousGanttDivYScroll)
+            // {
+            //     for(var i=0;i<taskTimings.length;i++)
+            //     {
+            //         if(this.scrollTop > taskTimings[i].y)
+            //         {
+            //             var currentXScroll=taskTimings[i].x+(previousGanttDivYScrollPercent*taskTimings[i].x);
+            //             this.scroll(currentXScroll,this.scrollTop);
+            //             console.log("previousGanttDivYScrollPercent",previousGanttDivYScrollPercent,"taskTimings",taskTimings[i]);
+            //             // break;
+            //         }
+            //     }
+            // }
+            // else
+            // {
+            //     for(var i=0;i<taskTimings.length;i++)
+            //     {
+            //         if(this.scrollTop < taskTimings[i].y)
+            //         {
+            //             currentXScroll=taskTimings[i].x-(previousGanttDivYScrollPercent*taskTimings[i].x);
+            //             this.scroll(currentXScroll,this.scrollTop);
+            //             console.log("previousGanttDivYScrollPercent",previousGanttDivYScrollPercent,"taskTimings",taskTimings[i]);
+            //             // break;
+            //         }
+            //     }
+            // }
                 if (self.viewModel) {
                 const taskLabelsWidth: number = self.viewModel.settings.taskLabels.show
                     ? self.viewModel.settings.taskLabels.width
@@ -1659,11 +1659,8 @@ export class Gantt implements IVisual {
                     // ticks=10;
                     break;
             }
-            const cultureSelector: string = this.host.locale;
-            let ganttDateTimeFormatter: IValueFormatter = ValueFormatter.create({
-                format: "MM/dd/yyyy hh:mm:ss",
-                cultureSelector
-            });
+            // const cultureSelector: string = "en-US";
+            let ganttDateTimeFormatter: IValueFormatter = ValueFormatter.create({});
             ganttTimelineStart=ganttDateTimeFormatter.format(startDate);
             ganttTimelineEnd=ganttDateTimeFormatter.format(endDate);
 
@@ -3147,7 +3144,10 @@ export class Gantt implements IVisual {
                 tooltipEvent.data.tooltipInfo[1].displayName="Job Start Date-Time";
                 tooltipEvent.data.tooltipInfo[2].displayName="Job End Date-Time";
                 tooltipEvent.data.tooltipInfo[3].displayName="Total Execution Time";
-                tooltipEvent.data.tooltipInfo[4].displayName="Wait Time (%) ";
+                if(typeof(tooltipEvent.data.tooltipInfo[4])!="undefined")
+                {
+                    tooltipEvent.data.tooltipInfo[4].displayName="Wait Time (%) ";
+                }
                 let tempval=tooltipEvent.data.tooltipInfo[3].value;
         
                 // tempval.indexOf("Visual_DurationUnit_Minutes");
