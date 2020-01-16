@@ -149,12 +149,16 @@ import { drawExpandButton, drawCollapseButton, drawMinusButton, drawPlusButton }
 
 const PercentFormat: string = "0.00 %;-0.00 %;0.00 %";
 const ScrollMargin: number = 100;
-const MillisecondsInASecond: number = 15000; // 15 Seconds
-const MillisecondsInAMinute: number = 2 * MillisecondsInASecond; // 30 Seconds
-const MillisecondsInAHour: number = 2 * MillisecondsInAMinute; // 1 Minute
-const MillisecondsInADay: number = 15 * MillisecondsInAHour; // 15 MInutes 
-const MillisecondsInWeek: number = 4 * MillisecondsInADay; // 1 Hour
-const MillisecondsInAMonth: number = 2 * MillisecondsInADay; // 24 Hours
+const MillisecondsInASecond: number = 1000; // 15 Seconds
+const MillisecondsIn15Seconds: number = 15000; // 15 Seconds
+const MillisecondsIn30Seconds: number = 30000; // 30 Seconds
+const MillisecondsInAMinute: number = 60 * MillisecondsInASecond; // 1 Minute
+const MillisecondsIn5Minutes: number = 5 * MillisecondsInAMinute; // 5 Minutes
+const MillisecondsIn15Minutes: number = 15 * MillisecondsInAMinute; // 15 Minutes 
+const MillisecondsInAHour: number = 60 * MillisecondsInAMinute; // 1 Hour
+const MillisecondsInADay: number = 24 * MillisecondsInAHour; // 24 Hours
+const MillisecondsInWeek: number = 7 * MillisecondsInADay; 
+const MillisecondsInAMonth: number = 30 * MillisecondsInADay; 
 const MillisecondsInAYear: number = 365 * MillisecondsInADay; // 1 Year
 const MillisecondsInAQuarter: number = MillisecondsInAYear / 4; // 1 Quarter
 const PaddingTasks: number = 5;
@@ -312,7 +316,7 @@ export class Gantt implements IVisual {
         ParentTaskLeftMargin: 0,
         DefaultDateType: "Second",
         DateFormatStrings: {
-            Second: "HH:mm:ss (MM - dd - yy)", // (MM - dd - yy)
+            Second: "HH:mm:ss (MM-dd-yy)", // (MM - dd - yy)
             Minute: "HH:mm (MM - dd - yy)",
             Hour: "HH:mm (MM - dd - yy)",
             Day: "MMM dd",
@@ -423,12 +427,12 @@ export class Gantt implements IVisual {
         const isHighContrast: boolean = this.colorHelper.isHighContrast;
         const axisBackgroundColor: string = this.colorHelper.getThemeColor();
         // create div container to the whole viewport area
-        this.visualFilterSelector=this.body.append("button").attr("name","intervalbtngrp").attr("id","1").html("15s");
-        this.body.append("button").attr("name","intervalbtngrp").attr("id","2").html("30s");
-        this.body.append("button").attr("name","intervalbtngrp").attr("id","3").html("1m");
-        this.body.append("button").attr("name","intervalbtngrp").attr("id","4").html("15m");
-        // this.body.append("button").attr("name","intervalbtngrp").attr("id","5").html("12hr");
-        // this.body.append("button").attr("name","intervalbtngrp").attr("id","6").html("24hr");
+        this.visualFilterSelector=this.body.append("button").attr("name","intervalbtngrp").attr("id","btn-15s").html("15s");
+        this.body.append("button").attr("name","intervalbtngrp").attr("id","btn-30s").html("30s");
+        this.body.append("button").attr("name","intervalbtngrp").attr("id","btn-1m").html("1m");
+        this.body.append("button").attr("name","intervalbtngrp").attr("id","btn-5m").html("5m");
+        this.body.append("button").attr("name","intervalbtngrp").attr("id","btn-15m").html("15m");
+        this.body.append("button").attr("name","intervalbtngrp").attr("id","btn-1h").html("1h");
         this.filterDateText=this.body.append("div").style("padding-left","45%").append("div").attr("name","ganttTimelineStartText").attr("id","ganttTimelineStartText").html("").style("align","center");
         
         this.ganttDiv = this.body.append("div")
@@ -1628,30 +1632,31 @@ export class Gantt implements IVisual {
             }
 
             let dateTypeMilliseconds: number = Gantt.getDateType(settings.dateType.type);
+            
             switch(customInterval)
             {
-                case "1":
-                    dateTypeMilliseconds= MillisecondsInASecond;
+                case "btn-15s":
+                    dateTypeMilliseconds= MillisecondsIn15Seconds;
                     // ticks=20;
                     break;
-                case "2":
+                case "btn-30s":
+                    dateTypeMilliseconds= MillisecondsIn30Seconds;
+                    // ticks=20;
+                    break;
+                case "btn-1m":
                     dateTypeMilliseconds= MillisecondsInAMinute;
                     // ticks=20;
                     break;
-                case "3":
+                case "btn-5m":
+                    dateTypeMilliseconds= MillisecondsIn5Minutes;
+                    // ticks=20;
+                    break;
+                case "btn-15m":
+                    dateTypeMilliseconds= MillisecondsIn15Minutes;
+                    // ticks=20;
+                    break;
+                case "btn-1h":
                     dateTypeMilliseconds= MillisecondsInAHour;
-                    // ticks=20;
-                    break;
-                case "4":
-                    dateTypeMilliseconds=MillisecondsInADay;
-                    // ticks=20;
-                    break;
-                case "5":
-                    dateTypeMilliseconds=MillisecondsInWeek;
-                    // ticks=20;
-                    break;
-                case "6":
-                    dateTypeMilliseconds=MillisecondsInWeek;
                     // ticks=20;
                     break;
                 default:
@@ -1863,6 +1868,7 @@ export class Gantt implements IVisual {
             format: Gantt.DefaultValues.DateFormatStrings[dateType],
             cultureSelector
         });
+        
         let xAxisProperties: IAxisProperties = AxisHelper.createAxis({
             pixelSpan: viewportIn.width,
             dataDomain: options.forcedXDomain,
@@ -1875,7 +1881,9 @@ export class Gantt implements IVisual {
             useTickIntervalForDisplayUnits: true,
             isCategoryAxis: true,
             getValueFn: (index) => {
-                let tempval=xAxisDateFormatter.format(new Date(index));
+                // let tempval=xAxisDateFormatter.format(new Date(index));
+                let time = new Date(index);
+                let tempval=time.toLocaleString('en-US', { year: 'numeric', month: 'numeric', day:'numeric', hour: 'numeric', minute: 'numeric', hour12: true })
                 // let datestring:string[]=tempval.split("(");
                 // tempval=datestring[0]+"\n"+datestring[1];
                 // console.log("Tempval Before",datestring);
