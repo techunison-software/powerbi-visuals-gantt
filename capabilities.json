@@ -68,7 +68,6 @@
             "name": "ExtraInformation",
             "displayName": "Tooltips",
             "displayNameKey": "Role_Tooltips",
-            "kind": "Grouping"
         },
         {
             "name": "Milestones",
@@ -115,7 +114,7 @@
                     },
                     "ExtraInformation": {
                         "min": 0,
-                        "max": 3
+                        "max": 10
                     },
                     "Milestones": {
                         "min": 0,
@@ -157,7 +156,7 @@
                     },
                     "ExtraInformation": {
                         "min": 0,
-                        "max": 3
+                        "max": 10
                     },
                     "Milestones": {
                         "min": 0,
@@ -199,7 +198,7 @@
                     },
                     "ExtraInformation": {
                         "min": 0,
-                        "max": 3
+                        "max": 10
                     },
                     "Milestones": {
                         "min": 0,
@@ -241,7 +240,7 @@
                     },
                     "ExtraInformation": {
                         "min": 0,
-                        "max": 3
+                        "max": 10
                     },
                     "Milestones": {
                         "min": 0,
@@ -314,11 +313,6 @@
             "displayName": "General",
             "displayNameKey": "Visual_General",
             "properties": {
-                "filter": {
-                    "type": {
-                        "filter": true
-                    }
-                },
                 "groupTasks": {
                     "displayName": "Group Tasks",
                     "displayNameKey": "Visual_GroupTasks",
