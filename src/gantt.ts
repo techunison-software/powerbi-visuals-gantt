@@ -179,6 +179,7 @@ let ganttTimelineStart:string="";
 let ganttTimelineEnd:string="";
 let taskTimings=[];
 let previousGanttDivYScroll:number=1;
+let previousGanttDivXScroll:number=1;
 
 
 
@@ -430,15 +431,15 @@ export class Gantt implements IVisual {
         // create div container to the whole viewport area
         
         this.visualFilterSelector=this.body.append("div").attr("name","intervalBtnGrpDiv").attr("id","intervalBtnGrpDiv");
-        this.visualFilterSelector.append("span").html("Time Interval &nbsp;&nbsp;")
-        this.visualFilterSelector.append("button").attr("name","intervalbtngrp").attr("id","btn-15s").html("15s");
-        this.visualFilterSelector.append("button").attr("name","intervalbtngrp").attr("id","btn-30s").html("30s");
-        this.visualFilterSelector.append("button").attr("name","intervalbtngrp").attr("id","btn-1m").html("1m");
-        this.visualFilterSelector.append("button").attr("name","intervalbtngrp").attr("id","btn-5m").html("5m");
-        this.visualFilterSelector.append("button").attr("name","intervalbtngrp").attr("id","btn-15m").html("15m").classed("btnclicked",true);;
-        this.visualFilterSelector.append("button").attr("name","intervalbtngrp").attr("id","btn-1h").html("1h")
-        this.filterDates=this.visualFilterSelector.append("p").attr("name","filterDates");
-        this.visualFilterSelector.append("span").attr("name","UserText").html("* Color intensity of the time blocks indicates the number of jobs waiting").style("font-size","9px").style("float","right");
+        this.visualFilterSelector.append("span").html("Time Increment &nbsp;&nbsp;").style("font-size","9pt").style("font-family","Segoe UI").style("font-color","#000");
+        this.visualFilterSelector.append("button").attr("name","intervalbtngrp").attr("id","btn-15s").html("15s").style("font-size","8pt").style("font-family","Segoe UI").style("font-color","#000");
+        this.visualFilterSelector.append("button").attr("name","intervalbtngrp").attr("id","btn-30s").html("30s").style("font-size","8pt").style("font-family","Segoe UI").style("font-color","#000");
+        this.visualFilterSelector.append("button").attr("name","intervalbtngrp").attr("id","btn-1m").html("1m").style("font-size","8pt").style("font-family","Segoe UI").style("font-color","#000");
+        this.visualFilterSelector.append("button").attr("name","intervalbtngrp").attr("id","btn-5m").html("5m").style("font-size","8pt").style("font-family","Segoe UI").style("font-color","#000");
+        this.visualFilterSelector.append("button").attr("name","intervalbtngrp").attr("id","btn-15m").html("15m").classed("btnclicked",true).style("font-size","8pt").style("font-family","Segoe UI").style("font-color","#000");
+        this.visualFilterSelector.append("button").attr("name","intervalbtngrp").attr("id","btn-1h").html("1h").style("font-size","8pt").style("font-family","Segoe UI").style("font-color","#000");
+        this.filterDates=this.visualFilterSelector.append("p").attr("name","filterDates").style("font-size","9pt").style("font-family","Segoe UI").style("font-color","#000");
+        // this.visualFilterSelector.append("span").attr("name","UserText").html("* The Darker color and lighter color indicates wait time and run time respectively").style("font-size","9px").style("float","right");
         this.ganttDiv = this.body.append("div")
             .classed(Selectors.Body.className, true);
 
@@ -511,69 +512,13 @@ export class Gantt implements IVisual {
             LegendPosition.Top,
             interactiveBehavior);
 
-            function onMouseEvent () {
-                // console.log("ScrollLeft",this.scrollLeft,"ScrollTop",this.scrollTop);
-                // console.log("tasktimings",taskTimings);
-                // let previousGanttDivYScrollPercent=previousGanttDivYScroll * 1.0 /this.scrollTop
-                // previousGanttDivYScrollPercent=Math.abs(1-previousGanttDivYScrollPercent);
-                // previousGanttDivYScroll=this.scrollTop;
-                if(this.scrollLeft>previousGanttDivYScroll)
-                {
-                    // console.log("ScrollLeft",this.scrollLeft,"ScrollTop",this.scrollTop);
-                        
-                    for(var i=0;i<taskTimings.length;i++)
-                    {
-                        if(this.scrollLeft > taskTimings[i].x)
-                        {
-                            //var currentXScroll=taskTimings[i].x+(previousGanttDivYScrollPercent*taskTimings[i].x);
-                            this.scroll(this.scrollLeft,taskTimings[i].y);
-                            // console.log("previousGanttDivYScroll",previousGanttDivYScroll,"taskTimings",taskTimings[i]);
-                            // break;
-                        }
-                    }
-                }
-                else
-                {
-                    // console.log("Else ScrollLeft",this.scrollLeft,"ScrollTop",this.scrollTop);
-
-                    for(var i=0;i<taskTimings.length;i++)
-                    {
-                        if(this.scrollLeft<10)
-                        {
-                            this.scroll(this.scrollLeft,0);
-                            break;
-                        }
-                        if(this.scrollLeft < taskTimings[i].x && this.scrollLeft>10)
-                        {
-                            //var currentXScroll=taskTimings[i].x+(previousGanttDivYScrollPercent*taskTimings[i].x);
-                            this.scroll(this.scrollLeft,taskTimings[i].y);
-                            // console.log("previousGanttDivYScroll",previousGanttDivYScroll,"taskTimings",taskTimings[i]);
-                            // break;
-                        }
-                        
-
-                    }
-                }
-                    if (self.viewModel) {
-                    const taskLabelsWidth: number = self.viewModel.settings.taskLabels.show
-                        ? self.viewModel.settings.taskLabels.width
-                        : 0;
-                    self.axisGroup
-                        .attr("transform", SVGManipulations.translate(taskLabelsWidth + self.margin.left + Gantt.SubtasksLeftMargin, Gantt.TaskLabelsMarginTop + this.scrollTop));
-                    self.lineGroup
-                        .attr("transform", SVGManipulations.translate(this.scrollLeft, 0))
-                        .attr("height", 20);
-                }
-                // self.updateOnRangeSelectonChange();
-            }
+            
 
         this.ganttDiv.on("scroll", function(){
-                // console.log("ScrollLeft",this.scrollLeft,"ScrollTop",this.scrollTop);
-                // console.log("tasktimings",taskTimings);
-                // let previousGanttDivYScrollPercent=previousGanttDivYScroll * 1.0 /this.scrollTop
-                // previousGanttDivYScrollPercent=Math.abs(1-previousGanttDivYScrollPercent);
-                // previousGanttDivYScroll=this.scrollTop;
-                if(this.scrollLeft>previousGanttDivYScroll)
+                let previousGanttDivYScrollPercent=previousGanttDivYScroll * 1.0 /this.scrollTop
+                previousGanttDivYScrollPercent=Math.abs(1-previousGanttDivYScrollPercent);
+                previousGanttDivYScroll=this.scrollTop;
+                if(this.scrollLeft>previousGanttDivXScroll)
                 {
                     // console.log("ScrollLeft",this.scrollLeft,"ScrollTop",this.scrollTop);
                         
@@ -582,13 +527,15 @@ export class Gantt implements IVisual {
                         if(this.scrollLeft > taskTimings[i].x)
                         {
                             //var currentXScroll=taskTimings[i].x+(previousGanttDivYScrollPercent*taskTimings[i].x);
+                            previousGanttDivYScroll=taskTimings[i].y;
+                            previousGanttDivXScroll=this.scrollLeft;
                             this.scroll(this.scrollLeft,taskTimings[i].y);
                             // console.log("previousGanttDivYScroll",previousGanttDivYScroll,"taskTimings",taskTimings[i]);
                             // break;
                         }
                     }
                 }
-                else
+                else if(this.scrollLeft<previousGanttDivXScroll)
                 {
                     // console.log("Else ScrollLeft",this.scrollLeft,"ScrollTop",this.scrollTop);
                     if(this.scrollLeft<10)
@@ -601,6 +548,8 @@ export class Gantt implements IVisual {
                         if(this.scrollLeft < taskTimings[i].x && this.scrollLeft>10)
                         {
                             //var currentXScroll=taskTimings[i].x+(previousGanttDivYScrollPercent*taskTimings[i].x);
+                            previousGanttDivYScroll=taskTimings[i].y;
+                            previousGanttDivXScroll=this.scrollLeft;
                             this.scroll(this.scrollLeft,taskTimings[i].y);
                             // console.log("previousGanttDivYScroll",previousGanttDivYScroll,"taskTimings",taskTimings[i]);
                             // break;
@@ -608,6 +557,113 @@ export class Gantt implements IVisual {
                         
                     }
                 }
+                else if(this.scrollTop>previousGanttDivYScroll)
+                {
+                    // console.log("Else ScrollLeft",this.scrollLeft,"ScrollTop",this.scrollTop);
+                    // if(this.scrollTop<10)
+                    //     {
+                    //         this.scroll(0,this.scrollTop);
+                    //     }
+                    for(var i=0;i<taskTimings.length;i++)
+                    {
+                        
+                        if(this.scrollTop > taskTimings[i].y)
+                        {
+                            //var currentXScroll=taskTimings[i].x+(previousGanttDivYScrollPercent*taskTimings[i].x);
+                            previousGanttDivYScroll=this.scrollTop;
+                            previousGanttDivXScroll=taskTimings[i].x;
+                            this.scroll(taskTimings[i].x,this.scrollTop);
+                            // console.log("previousGanttDivYScroll",previousGanttDivYScroll,"taskTimings",taskTimings[i]);
+                            // break;
+                        }
+                        
+                    }
+                }
+                else if(this.scrollTop<previousGanttDivYScroll)
+                {
+                    // console.log("Else ScrollLeft",this.scrollLeft,"ScrollTop",this.scrollTop);
+                    // if(this.scrollTop<10)
+                    //     {
+                    //         this.scroll(0,this.scrollTop);
+                    //     }
+                    for(var i=0;i<taskTimings.length;i++)
+                    {
+                        
+                        if(this.scrollTop < taskTimings[i].y)
+                        {
+                            //var currentXScroll=taskTimings[i].x+(previousGanttDivYScrollPercent*taskTimings[i].x);
+                            previousGanttDivYScroll=this.scrollTop;
+                            previousGanttDivXScroll=taskTimings[i].x;
+                            this.scroll(taskTimings[i].x,this.scrollTop);
+                            // console.log("previousGanttDivYScroll",previousGanttDivYScroll,"taskTimings",taskTimings[i]);
+                            // break;
+                        }
+                        
+                    }
+                }
+                // console.log("this.scrollLeft",this.scrollLeft,"previousGanttDivXScroll",previousGanttDivXScroll);
+                // if(this.scrollLeft>previousGanttDivXScroll)
+                // {                        
+                //     // console.log("tasktimings",taskTimings,"this.scrollLeft",this.scrollLeft);
+                //     var CurXscroll=this.scrollLeft;
+                //     var temp=taskTimings.filter(function(value,index,arr){
+                //         return value.x>CurXscroll;
+                //     })
+                //     console.log("temp",temp);
+                //     previousGanttDivYScroll=temp[0].y;
+                //     previousGanttDivXScroll=this.scrollLeft;
+                //     this.scroll(previousGanttDivXScroll,previousGanttDivYScroll)
+                //     // console.log("temp",temp);
+                // }
+                // else if(this.scrollLeft<previousGanttDivXScroll)
+                // {
+                //     if(this.scrollLeft<10)
+                //     {
+                //             this.scroll(0,0);
+                //     }                        
+                //     // console.log("else tasktimings",taskTimings,"this.scrollLeft",this.scrollLeft);
+                //     var CurXscroll=this.scrollLeft;
+                //     var temp=taskTimings.reverse().filter(function(value,index,arr){
+                //         return value.x<=CurXscroll;
+                //     })
+                //     console.log("before temp",temp);
+                //     temp=temp.reverse();
+                //     console.log("after temp",temp);
+                //     previousGanttDivYScroll=temp[0].y;
+                //     previousGanttDivXScroll=this.scrollLeft;
+                //     this.scroll(previousGanttDivXScroll,previousGanttDivYScroll)
+                // }
+                // else if(this.scrollTop<previousGanttDivYScroll)
+                // {
+                //     // console.log("ScrollLeft",this.scrollLeft,"ScrollTop",this.scrollTop);
+                        
+                //     console.log("else Y tasktimings",taskTimings,"this.scrollLeft",this.scrollLeft);
+                //     var CurYscroll=this.scrollTop;
+                //     var temp=taskTimings.reverse().filter(function(value,index,arr){
+                //         // console.log("value",value);
+                //         return value.y<CurYscroll;
+                //     })
+                //     previousGanttDivYScroll=this.scrollTop;
+                //     previousGanttDivXScroll=temp[0].x;
+                //     this.scroll(previousGanttDivXScroll,previousGanttDivYScroll)
+                //     console.log("temp",temp);
+                // }
+                // else if(this.scrollTop>previousGanttDivYScroll)
+                // {
+                //     // console.log("ScrollLeft",this.scrollLeft,"ScrollTop",this.scrollTop);
+                        
+                //     console.log("else tasktimings",taskTimings,"this.scrollTop",this.scrollTop);
+                //     var CurYscroll=this.scrollTop;
+                //     var temp=taskTimings.filter(function(value,index,arr){
+                //         // console.log("value",value);
+                //         return value.y>CurYscroll;
+                //     })
+                //     previousGanttDivYScroll=this.scrollTop;
+                //     previousGanttDivXScroll=temp[0].x;
+                //     this.scroll(previousGanttDivXScroll,previousGanttDivYScroll)
+                //     console.log("temp",temp);
+                // }
+
                     if (self.viewModel) {
                     const taskLabelsWidth: number = self.viewModel.settings.taskLabels.show
                         ? self.viewModel.settings.taskLabels.width
@@ -705,58 +761,12 @@ export class Gantt implements IVisual {
         isEndDateFillled: boolean): VisualTooltipDataItem[] {
 
         let tooltipDataArray: VisualTooltipDataItem[] = [];
-        if (task.taskType) {
+           if (task.resource) {
             tooltipDataArray.push({
-                displayName: localizationManager.getDisplayName("Role_Legend"),
-                value: task.taskType
-            });
-        }
-
-        tooltipDataArray.push({
-            displayName: localizationManager.getDisplayName("Role_Task"),
-            value: task.name
-        });
-
-        if (task.start && !isNaN(task.start.getDate())) {
-            tooltipDataArray.push({
-                displayName: localizationManager.getDisplayName("Role_StartDate"),
-                value: formatters.startDateFormatter.format(task.start)
-            });
-        }
-
-        if (_.isEmpty(task.Milestones) && task.end && !isNaN(task.end.getDate())) {
-            tooltipDataArray.push({
-                displayName: localizationManager.getDisplayName("Role_EndDate"),
-                value: formatters.startDateFormatter.format(task.end)
-            });
-        }
-
-        if (_.isEmpty(task.Milestones) && task.duration && !isEndDateFillled) {
-            const durationLabel: string = DurationHelper.generateLabelForDuration(task.duration, durationUnit, localizationManager);
-            tooltipDataArray.push({
-                displayName: localizationManager.getDisplayName("Role_Duration"),
-                value: durationLabel
-            });
-        }
-
-        if (task.completion) {
-            tooltipDataArray.push({
-                displayName: localizationManager.getDisplayName("Role_Completion"),
-                value: formatters.completionFormatter.format(task.completion)
-            });
-        }
-
-        if (task.resource) {
-            tooltipDataArray.push({
-                displayName: localizationManager.getDisplayName("Role_Resource"),
+                displayName: localizationManager.getDisplayName("Job Queue"),
                 value: task.resource
             });
         }
-
-        if (task.tooltipInfo && task.tooltipInfo.length) {
-            tooltipDataArray.push(...task.tooltipInfo);
-        }
-
         task.extraInformation
             .map(tooltip => {
                 if (typeof tooltip.value === "string") {
@@ -770,11 +780,75 @@ export class Gantt implements IVisual {
                 } else {
                     tooltip.value = formatters.startDateFormatter.format(value);
                 }
+                
 
                 return tooltip;
             })
-            .forEach(tooltip => tooltipDataArray.push(tooltip));
+            .forEach(tooltip =>  tooltipDataArray.push(tooltip));
+            console.log("tooltipDataArray",tooltipDataArray);
+        // if (task.taskType) {
+        //     // tooltipDataArray.push({
+        //     //     displayName: localizationManager.getDisplayName("Role_Legend"),
+        //     //     value: task.taskType
+        //     // });
+        // }
 
+        // tooltipDataArray.push({
+        //     displayName: localizationManager.getDisplayName("Role_Task"),
+        //     value: task.name
+        // });
+
+        if (task.start && !isNaN(task.start.getDate())) {
+            tooltipDataArray.push({
+                displayName: localizationManager.getDisplayName("Job Start Time"),
+                value: formatters.startDateFormatter.format(task.start)
+            });
+        }
+
+        if (_.isEmpty(task.Milestones) && task.end && !isNaN(task.end.getDate())) {
+            tooltipDataArray.push({
+                displayName: localizationManager.getDisplayName("Job End Time"),
+                value: formatters.startDateFormatter.format(task.end)
+            });
+        }
+
+        if (_.isEmpty(task.Milestones) && task.duration && !isEndDateFillled) {
+            const durationLabel: string = DurationHelper.generateLabelForDuration(task.duration, durationUnit, localizationManager);
+            let tempval=durationLabel;
+            let splittempval=tempval.split(" ");
+            if(splittempval.length==7)
+            {
+                tempval=splittempval[0]+" Hours "+splittempval[2]+" Minutes "+splittempval[4]+" Seconds ";
+            }    
+            if(splittempval.length==5)
+            {
+                tempval=splittempval[0]+" Minutes "+splittempval[2]+" Seconds ";
+            }
+            if(splittempval.length==3)
+            {
+                tempval=splittempval[0]+" Seconds ";
+            }    
+            tooltipDataArray.push({
+                displayName: localizationManager.getDisplayName("Total Execution Time"),
+                
+                value: tempval
+            });
+        }
+
+        if (task.completion) {
+            tooltipDataArray.push({
+                displayName: localizationManager.getDisplayName("Wait Time (%)"),
+                value: formatters.completionFormatter.format(task.completion)
+            });
+        }
+
+     
+
+        // if (task.tooltipInfo && task.tooltipInfo.length) {
+        //     // tooltipDataArray.push(...task.tooltipInfo);
+        // }
+
+        
         tooltipDataArray
             .filter(x => x.value && typeof x.value !== "string")
             .forEach(tooltip => tooltip.value = tooltip.value.toString());
@@ -1092,7 +1166,6 @@ export class Gantt implements IVisual {
             const startDate: Date = (values.StartDate && values.StartDate[index]
                 && isValidDate(new Date(values.StartDate[index])) && new Date(values.StartDate[index]))
                 || new Date(Date.now());
-
             if (values.ExtraInformation) {
                 const extraInformationKeys: any[] = Object.keys(values.ExtraInformation);
                 for (const key of extraInformationKeys) {
@@ -1595,7 +1668,6 @@ export class Gantt implements IVisual {
 
     private scaleAxisLength(axisLength: number): number {
         let fullScreenAxisLength: number = Gantt.DefaultGraphicWidthPercentage * this.viewport.width;
-        // console.log("scaleAxisLength",axisLength,"fullScreenAxisLength",fullScreenAxisLength);
         if (axisLength < fullScreenAxisLength) {
             axisLength = fullScreenAxisLength;
         }
@@ -1609,12 +1681,12 @@ export class Gantt implements IVisual {
         d3.selectAll("[name=intervalbtngrp]").on("click", function () {
             customInterval=d3.select(this).attr("id");
             // customInterval=d3.select(this).attr("value");
-            // console.log("customInterval",customInterval);
-            // console.log("this.initOptions",initOptions);
+            
+            
             self.update(initOptions);
             d3.selectAll("[name=intervalbtngrp]").classed("btnclicked",false);
             d3.select(this).classed("btnclicked",true)
-            // console.log("Hello");
+            
             // Gantt.
 
         });
@@ -1630,7 +1702,7 @@ export class Gantt implements IVisual {
             return;
         }
         initOptions=options;
-        console.log("initOptions",initOptions);
+        
         taskTimings=[];
 
         this.viewModel = Gantt.converter(options.dataViews[0], this.host, this.colors, this.colorHelper, this.localizationManager);
@@ -1662,8 +1734,8 @@ export class Gantt implements IVisual {
         this.eventService.renderingStarted(options);
         this.renderLegend();
         this.updateChartSize();
-        console.log("this.viewModel.tasks",this.viewModel.tasks);
-        console.log("this.viewModel.tasks",this.viewModel.tasks.length);
+        
+        
         const visibleTasks = this.viewModel.tasks
             .filter((task: Task) => task.visibility);
         const tasks: Task[] = visibleTasks
@@ -1671,8 +1743,8 @@ export class Gantt implements IVisual {
                 task.index = i;
                 return task;
             });
-            console.log("visibleTasks",visibleTasks);
-            console.log("filteredtasks",tasks);
+            
+            
 
 
         if (this.interactivityService) {
@@ -1700,7 +1772,7 @@ export class Gantt implements IVisual {
         if (this.hasNotNullableDates) {
             let startDate: Date = minDateTask.start;
             let endDate: Date = maxDateTask.end;
-            console.log("startDate",startDate,"endDate",endDate);
+            
             if (startDate.toString() === endDate.toString()) {
                 endDate = new Date(endDate.valueOf() + (24 * 60 * 60 * 1000));
             }
@@ -1742,62 +1814,16 @@ export class Gantt implements IVisual {
             let ganttDateTimeFormatter: IValueFormatter = ValueFormatter.create({});
             ganttTimelineStart=ganttDateTimeFormatter.format(startDate);
             ganttTimelineEnd=ganttDateTimeFormatter.format(endDate);
-
-            // var calcmonth=startDate.getMonth()+1;
-            // console.log("ganttDateTimeFormatter",ganttDateTimeFormatter.format(startDate));
-            // if(calcmonth<10)
-            // ganttTimelineStart="0"+calcmonth+"/";
-            // else
-            // ganttTimelineStart=calcmonth+"/";
             
-            // if(startDate.getDate()<10)
-            // ganttTimelineStart=ganttTimelineStart+"0"+startDate.getDate()+"/"+startDate.getFullYear().toString();
-            // else
-            // ganttTimelineStart=ganttTimelineStart+startDate.getDate()+"/"+startDate.getFullYear().toString();
-            
-            // if (startDate.getHours()<10)
-            // ganttTimelineStart=ganttTimelineStart+" 0"+startDate.getHours();
-            // else
-            // ganttTimelineStart=ganttTimelineStart+ " "+startDate.getHours();
-            
-            // if (startDate.getMinutes()<10)
-            // ganttTimelineStart=ganttTimelineStart+":0"+startDate.getMinutes();
-            // else
-            // ganttTimelineStart=ganttTimelineStart+":"+startDate.getMinutes();
-
-            // calcmonth=endDate.getMonth()+1;
-
-            // if(calcmonth<10)
-            // ganttTimelineEnd="0"+calcmonth+"/";
-            // else
-            // ganttTimelineEnd=calcmonth+"/";
-
-            // if(endDate.getDate()<10)
-            // ganttTimelineEnd=ganttTimelineEnd+"0"+endDate.getDate()+"/"+endDate.getFullYear().toString();
-            // else
-            // ganttTimelineEnd=ganttTimelineEnd+endDate.getDate()+"/"+endDate.getFullYear().toString();
-
-            // if (endDate.getHours()<10)
-            // ganttTimelineEnd=ganttTimelineEnd+" 0"+endDate.getHours();
-            // else
-            // ganttTimelineEnd=ganttTimelineEnd+ " "+endDate.getHours();
-            
-            // if (endDate.getMinutes()<10)
-            // ganttTimelineEnd=ganttTimelineEnd+":0"+endDate.getMinutes();
-            // else
-            // ganttTimelineEnd=ganttTimelineEnd+":"+endDate.getMinutes();
-
-            // ganttTimelineEnd=endDate.getFullYear()+"-0"+calcmonth+"-0"+endDate.getDate().toString();
-            // console.log("ganttTimelineStart",ganttTimelineStart,"ganttTimelineEnd",ganttTimelineEnd);
             let ticks: number = Math.ceil(Math.round(endDate.valueOf() - startDate.valueOf()) / dateTypeMilliseconds);
-            console.log("ticks",ticks);
+            
             ticks = ticks < 4 ? 4 : ticks;
             this.filterDates.style("width","350px").style("margin","0").style("display","inline").style("padding-left","19%").html(ganttTimelineStart + " - " + ganttTimelineEnd)
-            console.log("Before Calculating",axisLength);
+            
             axisLength = ticks * Gantt.DefaultTicksLength;
-            console.log("Before Scaling",axisLength);
+            
             axisLength = this.scaleAxisLength(axisLength);
-            console.log("After Scaling",axisLength);
+            
             
             let viewportIn: IViewport = {
                 height: this.viewport.height,
@@ -1805,9 +1831,9 @@ export class Gantt implements IVisual {
             };
 
             let xAxisProperties: IAxisProperties = this.calculateAxes(viewportIn, this.textProperties, startDate, endDate, ticks, false);
-            // console.log("xAxisProperties",xAxisProperties);
+            
             this.timeScale = <timeScale<Date, Date>>xAxisProperties.scale;
-            // console.log("this.timeScale",this.timeScale);
+            
             this.renderAxis(xAxisProperties);
             // this.updateOnRangeSelectonChange();
 
@@ -1942,7 +1968,7 @@ export class Gantt implements IVisual {
             format: Gantt.DefaultValues.DateFormatStrings[dateType],
             cultureSelector
         });
-        console.log("options.forcedtickcount",options.forcedTickCount)
+        
         let xAxisProperties: IAxisProperties = AxisHelper.createAxis({
             pixelSpan: viewportIn.width,
             dataDomain: options.forcedXDomain,
@@ -1955,19 +1981,18 @@ export class Gantt implements IVisual {
             useTickIntervalForDisplayUnits: true,
             isCategoryAxis: true,
             getValueFn: (index) => {
-                // let tempval=xAxisDateFormatter.format(new Date(index));
                 let time = new Date(index);
                 let tempval=time.toLocaleString('en-US', { year: 'numeric', month: 'numeric', day:'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: true })
-                // let datestring:string[]=tempval.split("(");
-                // tempval=datestring[0]+"\n"+datestring[1];
-                // console.log("Tempval Before",datestring);
-                // console.log("Final Tempval",tempval);
+
+                
+                let splittempval=tempval.split(", ");
+                tempval=splittempval[1]+" - "+splittempval[0];
                 return tempval;
             },
             scaleType: options.categoryAxisScaleType,
             axisDisplayUnits: options.categoryAxisDisplayUnits,
         });
-        // console.log("xAxisProperties",xAxisProperties);
+        
         xAxisProperties.axisLabel = metaDataColumn.displayName;
         return xAxisProperties;
     }
@@ -2063,7 +2088,7 @@ export class Gantt implements IVisual {
         this.axisGroup.call(xAxis.tickSizeOuter(xAxisProperties.outerPadding));
 
         // debugger;
-        console.log("xAxisProperties",xAxisProperties);
+        
 
         this.axisGroup
             .transition()
@@ -2080,7 +2105,7 @@ export class Gantt implements IVisual {
 
         this.axisGroup
             .selectAll(".tick text")
-            .style("fill", (timestamp: number) => this.setTickColor(timestamp, axisTextColor));
+            .style("fill", (timestamp: number) => this.setTickColor(timestamp, axisTextColor)).style("font-size","8pt").style("font-family","Segoe UI").style("color","#000");
         
     }
 
@@ -2315,7 +2340,7 @@ export class Gantt implements IVisual {
         }
 
         const taskClickedParent: string = taskClicked.tasks[0].parent || taskClicked.tasks[0].name;
-        console.log("task.len",this.viewModel.tasks.length);
+        
         this.viewModel.tasks.forEach((task: Task) => {
             if (task.parent === taskClickedParent &&
                 task.parent.length >= taskClickedParent.length) {
@@ -2545,7 +2570,7 @@ export class Gantt implements IVisual {
         if (width < 2 * radius) {
             return drawNotRoundedRectByPath(x, y, width, height);
         }
-        // console.log("taskcoordinates",taskcoordinates,"taskTimings",taskTimings);
+        
         return drawRoundedRectByPath(x, y, width + Gantt.RectRound, height, radius);
     }
 
@@ -3229,30 +3254,8 @@ export class Gantt implements IVisual {
         this.tooltipServiceWrapper.addTooltip(
             selection,
             (tooltipEvent: TooltipEventArgs<TooltipEnabledDataPoint>) => {
-                tooltipEvent.data.tooltipInfo[0].displayName="Batch Job";
-                tooltipEvent.data.tooltipInfo[1].displayName="Job Start Date-Time";
-                tooltipEvent.data.tooltipInfo[2].displayName="Job End Date-Time";
-                tooltipEvent.data.tooltipInfo[3].displayName="Total Execution Time";
+          
                 
-                if(typeof(tooltipEvent.data.tooltipInfo[4])!="undefined")
-                    tooltipEvent.data.tooltipInfo[4].displayName="Wait Time (%) ";
-                else
-                    tooltipEvent.data.tooltipInfo[4]={displayName:"Wait Time (%) ",value:"0.00"};
-                
-                let tempval=tooltipEvent.data.tooltipInfo[3].value;
-        
-                // tempval.indexOf("Visual_DurationUnit_Minutes");
-                if(tooltipEvent.data.tooltipInfo[3].value.indexOf("Visual_DurationUnit_Seconds")!=-1 || tooltipEvent.data.tooltipInfo[3].value.indexOf("Visual_DurationUnit_Minutes")!=-1)
-                {
-                tempval=tooltipEvent.data.tooltipInfo[3].value.substring(tooltipEvent.data.tooltipInfo[3].value.indexOf("Visual_DurationUnit_Seconds")-3,tooltipEvent.data.tooltipInfo[3].value.indexOf("Visual_DurationUnit_Seconds"))+"Seconds";
-                }
-                if(tooltipEvent.data.tooltipInfo[3].value.indexOf("Visual_DurationUnit_Minutes")!=-1)
-                {
-                tempval=tooltipEvent.data.tooltipInfo[3].value.substring(0,tooltipEvent.data.tooltipInfo[3].value.indexOf("Visual_DurationUnit_Minutes"))+"Minutes "+tempval;
-                }
-                // console.log("tempval",tempval);
-                tooltipEvent.data.tooltipInfo[3].value=tempval;
-                // console.log("tooltipEvent.data.tooltipInfo",tooltipEvent.data.tooltipInfo);
                 return tooltipEvent.data.tooltipInfo;
             });
     }
